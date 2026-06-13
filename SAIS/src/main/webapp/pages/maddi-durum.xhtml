@@ -1,0 +1,482 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core">
+
+    <f:metadata>
+        <f:viewParam name="muracaatId" value="#{muracaatController.selectedMuracaat.id}"/>
+        <f:event type="preRenderView" listener="#{maddiDurumController.loadMaddiDurum(muracaatController.selectedMuracaat.id)}"/>
+    </f:metadata>
+
+    <h:panelGroup id="maddiDurumKart" layout="block" styleClass="card">
+        <h3 class="card-header">
+            <i class="fas fa-money-bill-wave"></i> Aile Maddi Durum Bilgileri
+        </h3>
+        
+        <div class="card-body">
+            <!-- Özet Kartları -->
+            <h:panelGroup id="ozetKartlar" styleClass="ozetKartlar" layout="block">
+            <div class="stats-grid" style="margin-bottom: 30px;">
+                <div class="stat-card success">
+                    <div class="stat-title">Toplam Gelir</div>
+                    <div class="stat-value">
+                        <h:outputText value="#{maddiDurumController.toplamGelir}">
+                            <f:convertNumber type="currency" currencySymbol="₺" groupingUsed="true"/>
+                        </h:outputText>
+                        <i class="fas fa-plus-circle stat-icon"></i>
+                    </div>
+                </div>
+                
+                <div class="stat-card error">
+                    <div class="stat-title">Toplam Borç</div>
+                    <div class="stat-value">
+                        <h:outputText value="#{maddiDurumController.toplamBorc}">
+                            <f:convertNumber type="currency" currencySymbol="₺" groupingUsed="true"/>
+                        </h:outputText>
+                        <i class="fas fa-minus-circle stat-icon"></i>
+                    </div>
+                </div>
+                
+                <div class="stat-card" style="border-left-color: #{maddiDurumController.netGelir >= 0 ? 'var(--success-color)' : 'var(--error-color)'}">
+                    <div class="stat-title">Net Durum</div>
+                    <div class="stat-value" style="color: #{maddiDurumController.netGelir >= 0 ? 'var(--success-color)' : 'var(--error-color)'}">
+                        <h:outputText value="#{maddiDurumController.netGelir}">
+                            <f:convertNumber type="currency" currencySymbol="₺" groupingUsed="true"/>
+                        </h:outputText>
+                        <i class="fas fa-balance-scale stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+            </h:panelGroup>
+            
+            <!-- GELİR BİLGİLERİ -->
+            <p:panel id="gelirPanel" styleClass="gelirPanel" header="Gelir Bilgileri" style="margin-bottom: 20px;">
+                <!-- Gelir Ekleme Formu -->
+                <div class="form-grid" style="margin-bottom: 20px;">
+                    <div class="form-field">
+                        <p:outputLabel for="gelirFert" value="Geliri Olan Kişi" styleClass="required"/>
+                        <p:selectOneMenu id="gelirFert" 
+                                       value="#{maddiDurumController.selectedGelirKisi}"
+                                       converter="omnifaces.SelectItemsConverter">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                            <f:selectItems value="#{maddiDurumController.aileFertleri}" 
+                                          var="fert"
+                                          itemLabel="#{fert.kisi.ad} #{fert.kisi.soyad} (#{fert.yakinlikKodu.adi})"
+                                          itemValue="#{fert}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <div class="form-field">
+                        <p:outputLabel for="gelirTuru" value="Gelir Türü" styleClass="required"/>
+                        <p:selectOneMenu id="gelirTuru" 
+                                       value="#{maddiDurumController.selectedGelirTuru}"
+                                       converter="omnifaces.SelectItemsConverter">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                            <f:selectItems value="#{maddiDurumController.gelirTurleri}" 
+                                          var="gelirTuru"
+                                          itemLabel="#{gelirTuru.adi}"
+                                          itemValue="#{gelirTuru}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <div class="form-field">
+                        <p:outputLabel for="gelirTutari" value="Gelir Tutarı (₺)" styleClass="required"/>
+                        <p:inputNumber id="gelirTutari" 
+                                     value="#{maddiDurumController.gelirTutari}"
+                                     minValue="0"
+                                     decimalPlaces="2"
+                                     symbol=" ₺"
+                                     symbolPosition="s"
+                                     placeholder="0,00"/>
+                    </div>
+                    
+                    <div class="form-field" style="display: flex; align-items: flex-end;">
+                        <p:commandButton value="Gelir Ekle" 
+                                       icon="pi pi-plus" 
+                                       styleClass="ui-button-success"
+                                       action="#{maddiDurumController.addGelir}" 
+                                       update="@(.gelirPanel) @(.ozetKartlar)" 
+                                       process="@this gelirFert gelirTuru gelirTutari"/>
+                    </div>
+                </div>
+                
+                <!-- Gelir Listesi -->
+                <p:dataTable value="#{maddiDurumController.gelirBilgileri}" 
+                           var="gelir"
+                           emptyMessage="Gelir kaydı bulunmamaktadır"
+                           responsiveLayout="scroll">
+                    <p:column headerText="Kimlik No">
+                        <h:outputText value="#{gelir.kisi.tcKimlikNo}"/>
+                    </p:column>
+                    <p:column headerText="Ad Soyad">
+                        <h:outputText value="#{gelir.kisi.ad} #{gelir.kisi.soyad}"/>
+                    </p:column>
+                    <p:column headerText="Yakınlık">
+                        <h:outputText value="#{maddiDurumController.getYakinlik(gelir.kisi)}" 
+                                    style="color: var(--primary-color);"/>
+                    </p:column>
+                    <p:column headerText="Gelir Türü">
+                        <h:outputText value="#{gelir.gelirTuru.adi}"/>
+                    </p:column>
+                    <p:column headerText="Tutar">
+                        <h:outputText value="#{gelir.gelirTutari}" style="font-weight: 600;">
+                            <f:convertNumber type="currency" currencySymbol="₺"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="İşlemler" style="width: 100px; text-align: center;">
+                        <p:commandButton icon="pi pi-trash" 
+                                       styleClass="ui-button-danger ui-button-sm"
+                                       action="#{maddiDurumController.deleteGelir(gelir)}" 
+                                       update="@(.gelirPanel) @(.ozetKartlar)" 
+                                       process="@this"
+                                       oncomplete="console.log('Gelir silindi')">
+                            <p:confirm message="Silmek istediğinizden emin misiniz?"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+            
+            <!-- BORÇ BİLGİLERİ -->
+            <p:panel id="borcPanel" styleClass="borcPanel" header="Borç ve Gider Bilgileri" style="margin-bottom: 20px;">
+                <!-- Borç Ekleme Formu -->
+                <div class="form-grid" style="margin-bottom: 20px;">
+                    <div class="form-field">
+                        <p:outputLabel for="borcTuru" value="Borç/Gider Türü" styleClass="required"/>
+                        <p:selectOneMenu id="borcTuru" 
+                                       value="#{maddiDurumController.selectedBorcTuru}"
+                                       converter="omnifaces.SelectItemsConverter">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                            <f:selectItems value="#{maddiDurumController.borcTurleri}" 
+                                          var="borcTuru"
+                                          itemLabel="#{borcTuru.adi}"
+                                          itemValue="#{borcTuru}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <div class="form-field">
+                        <p:outputLabel for="borcTutari" value="Tutar (₺)" styleClass="required"/>
+                        <p:inputNumber id="borcTutari" 
+                                     value="#{maddiDurumController.borcTutari}"
+                                     minValue="0"
+                                     decimalPlaces="2"
+                                     symbol=" ₺"
+                                     symbolPosition="s"
+                                     placeholder="0,00"/>
+                    </div>
+                    
+                    <div class="form-field" style="display: flex; align-items: flex-end;">
+                        <p:commandButton value="Borç Ekle" 
+                                       icon="pi pi-plus" 
+                                       styleClass="ui-button-danger"
+                                       action="#{maddiDurumController.addBorc}" 
+                                       update="@(.borcPanel) @(.ozetKartlar)" 
+                                       process="@this borcTuru borcTutari"/>
+                    </div>
+                </div>
+                
+                <!-- Borç Listesi -->
+                <p:dataTable value="#{maddiDurumController.borcBilgileri}" 
+                           var="borc"
+                           emptyMessage="Borç kaydı bulunmamaktadır"
+                           responsiveLayout="scroll">
+                    <p:column headerText="Borç/Gider Türü">
+                        <h:outputText value="#{borc.borcTuru.adi}"/>
+                    </p:column>
+                    <p:column headerText="Tutar">
+                        <h:outputText value="#{borc.borcTutari}" style="font-weight: 600; color: var(--error-color);">
+                            <f:convertNumber type="currency" currencySymbol="₺"/>
+                        </h:outputText>
+                    </p:column>
+                    <p:column headerText="İşlemler" style="width: 100px; text-align: center;">
+                        <p:commandButton icon="pi pi-trash" 
+                                       styleClass="ui-button-danger ui-button-sm"
+                                       action="#{maddiDurumController.deleteBorc(borc)}" 
+                                       update="@(.borcPanel) @(.ozetKartlar)" 
+                                       process="@this"
+                                       oncomplete="console.log('Borç silindi')">
+                            <p:confirm message="Silmek istediğinizden emin misiniz?"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+            
+            <!-- GAYRİMENKUL BİLGİLERİ -->
+            <p:panel header="Gayrimenkul ve Varlık Bilgileri" style="margin-bottom: 20px;">
+                <div class="form-grid">
+                    <!-- Evi Var mı? -->
+                    <div class="form-field" style="grid-column: 1 / -1; padding: 10px; background-color: #f8fafc; border-radius: 6px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <p:selectBooleanCheckbox id="eviVar" 
+                                                    value="#{maddiDurumController.gayrimenkulBilgisi.eviVar}"
+                                                    onchange="console.log('Evi Var değişti:', this.checked);">
+                                <p:ajax event="valueChange" 
+                                        listener="#{maddiDurumController.onGayrimenkulCheckboxChange}"
+                                        update="evPanelContainer" 
+                                        process="@this"
+                                        oncomplete="console.log('AJAX tamamlandı - Evi Var')"/>
+                            </p:selectBooleanCheckbox>
+                            <p:outputLabel for="eviVar" value="Evi Var mı?" style="font-weight: 600; font-size: 14px;"/>
+                            <span style="color: #64748b; font-size: 12px;">
+                                (✅ İşaretli ise: Ev Tipi/Yakacak | ☐ İşaretsiz ise: Kira/Lojman)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Ev Panel Container -->
+                    <h:panelGroup id="evPanelContainer" layout="block" style="grid-column: 1 / -1;">
+                    <!-- Ev Detayları-->
+                    <p:panel id="evEvetPanel" 
+                            header="✅ Evi Var - Detay Bilgileri"
+                            rendered="#{maddiDurumController.gayrimenkulBilgisi.eviVar}" 
+                            style="grid-column: 1 / -1; background-color: #f0fdf4; border-left: 4px solid #22c55e;">
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <p:outputLabel for="evTipi" value="Ev Tipi" styleClass="required"/>
+                                <p:selectOneMenu id="evTipi" value="#{maddiDurumController.gayrimenkulBilgisi.evTipi}">
+                                    <f:selectItems value="#{maddiDurumController.evTipiList}" 
+                                                 var="evTip" 
+                                                 itemLabel="#{evTip.label}" 
+                                                 itemValue="#{evTip}"/>
+                                </p:selectOneMenu>
+                            </div>
+                            
+                            <div class="form-field">
+                                <p:outputLabel for="evYakacak" value="Ev Yakacak Tipi" styleClass="required"/>
+                                <p:selectOneMenu id="evYakacak" value="#{maddiDurumController.gayrimenkulBilgisi.evYakacakTipi}">
+                                    <f:selectItems value="#{maddiDurumController.evYakacakTipiList}" 
+                                                 var="yakacak" 
+                                                 itemLabel="#{yakacak.label}" 
+                                                 itemValue="#{yakacak}"/>
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                    </p:panel>
+                    
+                    <!-- Ev Detayları -->
+                    <p:panel id="evHayirPanel" 
+                            header="❌ Evi Yok - Kira/Lojman Bilgileri"
+                            rendered="#{not maddiDurumController.gayrimenkulBilgisi.eviVar}" 
+                            style="grid-column: 1 / -1; background-color: #fef2f2; border-left: 4px solid #ef4444;">
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <p:outputLabel for="evMulkiyet" value="Ev Mülkiyeti" styleClass="required"/>
+                                <p:selectOneMenu id="evMulkiyet" value="#{maddiDurumController.gayrimenkulBilgisi.evMulkiyet}">
+                                    <f:selectItems value="#{maddiDurumController.evMulkiyetList}" 
+                                                 var="mulkiyet" 
+                                                 itemLabel="#{mulkiyet.label}" 
+                                                 itemValue="#{mulkiyet}"/>
+                                </p:selectOneMenu>
+                            </div>
+                            
+                            <div class="form-field">
+                                <p:outputLabel for="kiraTutari" value="Aylık Kira Tutarı" styleClass="required"/>
+                                <p:inputNumber id="kiraTutari" 
+                                             value="#{maddiDurumController.gayrimenkulBilgisi.kiraTutari}"
+                                             minValue="0"
+                                             decimalPlaces="2"
+                                             symbol=" ₺"
+                                             symbolPosition="s"
+                                             placeholder="0,00"/>
+                            </div>
+                        </div>
+                    </p:panel>
+                    </h:panelGroup>
+                    
+                    <!-- Kirada evi var mı? -->
+                    <div class="form-field" style="grid-column: 1 / -1; padding: 10px; background-color: #f8fafc; border-radius: 6px; margin-top: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <p:selectBooleanCheckbox id="kiradaEvi" 
+                                                    value="#{maddiDurumController.gayrimenkulBilgisi.kiradaEviVar}"
+                                                    onchange="console.log('Kirada Evi değişti:', this.checked);">
+                                <p:ajax event="valueChange" 
+                                        listener="#{maddiDurumController.onGayrimenkulCheckboxChange}"
+                                        update="kiraPanelContainer" 
+                                        process="@this"
+                                        oncomplete="console.log('AJAX tamamlandı - Kirada Evi')"/>
+                            </p:selectBooleanCheckbox>
+                            <p:outputLabel for="kiradaEvi" value="Kirada Evi Var mı?" style="font-weight: 600; font-size: 14px;"/>
+                            <span style="color: #64748b; font-size: 12px;">
+                                (✅ İşaretli ise: Kirada Ev Sayısı + Toplam Kira Geliri gösterilir)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Kira Panel Container -->
+                    <h:panelGroup id="kiraPanelContainer" layout="block" style="grid-column: 1 / -1;">
+                    <!-- Kira Detayları -->
+                    <p:panel id="kiraDetayPanel" 
+                            header="Kira Geliri Bilgileri"
+                            rendered="#{maddiDurumController.gayrimenkulBilgisi.kiradaEviVar}" 
+                            style="grid-column: 1 / -1; background-color: #f0f9ff; border-left: 4px solid #3b82f6;">
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <p:outputLabel for="kiradaEvSayisi" value="Kirada Ev Sayısı" styleClass="required"/>
+                                <p:inputNumber id="kiradaEvSayisi" 
+                                             value="#{maddiDurumController.gayrimenkulBilgisi.kiradaEvSayisi}"
+                                             minValue="1"
+                                             decimalPlaces="0"
+                                             placeholder="Örn: 1, 2, 3"/>
+                            </div>
+                            
+                            <div class="form-field">
+                                <p:outputLabel for="toplamKiraGeliri" value="Toplam Kira Geliri (Aylık)" styleClass="required"/>
+                                <p:inputNumber id="toplamKiraGeliri" 
+                                             value="#{maddiDurumController.gayrimenkulBilgisi.toplamKiraGeliri}"
+                                             minValue="0"
+                                             decimalPlaces="2"
+                                             symbol=" ₺"
+                                             symbolPosition="s"
+                                             placeholder="0,00"/>
+                            </div>
+                        </div>
+                    </p:panel>
+                    </h:panelGroup>
+                    
+                    <!-- Araba Var mı? -->
+                    <div class="form-field" style="grid-column: 1 / -1; padding: 10px; background-color: #f8fafc; border-radius: 6px; margin-top: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <p:selectBooleanCheckbox id="arabaVar" 
+                                                    value="#{maddiDurumController.gayrimenkulBilgisi.arabaVar}"
+                                                    onchange="console.log('Araba Var değişti:', this.checked);">
+                                <p:ajax event="valueChange" 
+                                        listener="#{maddiDurumController.onGayrimenkulCheckboxChange}"
+                                        update="arabaPanelContainer" 
+                                        process="@this"
+                                        oncomplete="console.log('AJAX tamamlandı - Araba Var')"/>
+                            </p:selectBooleanCheckbox>
+                            <p:outputLabel for="arabaVar" value="Araba Var mı?" style="font-weight: 600; font-size: 14px;"/>
+                            <span style="color: #64748b; font-size: 12px;">
+                                (✅ İşaretli ise: Araba Modeli girilir)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Araba Panel Container -->
+                    <h:panelGroup id="arabaPanelContainer" layout="block" style="grid-column: 1 / -1;">
+                    <!-- Araba Detayları -->
+                    <p:panel id="arabaDetayPanel" 
+                            header="🚗 Araba Bilgileri"
+                            rendered="#{maddiDurumController.gayrimenkulBilgisi.arabaVar}" 
+                            style="grid-column: 1 / -1; background-color: #fffbeb; border-left: 4px solid #f59e0b;">
+                        <div class="form-field">
+                            <p:outputLabel for="arabaModeli" value="Araba Modeli" styleClass="required"/>
+                            <p:inputText id="arabaModeli" 
+                                       value="#{maddiDurumController.gayrimenkulBilgisi.arabaModeli}"
+                                       placeholder="Örn: Renault Clio, Opel Astra, Fiat Egea"/>
+                        </div>
+                    </p:panel>
+                    </h:panelGroup>
+                    
+                    <!-- Gayrimenkul Var mı? -->
+                    <div class="form-field" style="grid-column: 1 / -1; padding: 10px; background-color: #f8fafc; border-radius: 6px; margin-top: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <p:selectBooleanCheckbox id="gayrimenkulVar" 
+                                                    value="#{maddiDurumController.gayrimenkulBilgisi.gayrimenkulVar}"
+                                                    onchange="console.log('Gayrimenkul Var değişti:', this.checked);">
+                                <p:ajax event="valueChange" 
+                                        listener="#{maddiDurumController.onGayrimenkulCheckboxChange}"
+                                        update="gayrimenkulPanelContainer" 
+                                        process="@this"
+                                        oncomplete="console.log('AJAX tamamlandı - Gayrimenkul Var')"/>
+                            </p:selectBooleanCheckbox>
+                            <p:outputLabel for="gayrimenkulVar" value="Gayrimenkul Var mı?" style="font-weight: 600; font-size: 14px;"/>
+                            <span style="color: #64748b; font-size: 12px;">
+                                (✅ İşaretli ise: Gayrimenkul Türü seçilir - Arsa, Tarla, Hisse vb.)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Gayrimenkul Panel Container -->
+                    <h:panelGroup id="gayrimenkulPanelContainer" layout="block" style="grid-column: 1 / -1;">
+                    <!-- Gayrimenkul Detayları -->
+                    <p:panel id="gayrimenkulDetayPanel" 
+                            header="🏢 Gayrimenkul Bilgileri"
+                            rendered="#{maddiDurumController.gayrimenkulBilgisi.gayrimenkulVar}" 
+                            style="grid-column: 1 / -1; background-color: #fef3c7; border-left: 4px solid #f59e0b;">
+                        <div class="form-field">
+                            <p:outputLabel for="gayrimenkulTuru" value="Gayrimenkul Türü" styleClass="required"/>
+                            <p:selectOneMenu id="gayrimenkulTuru" value="#{maddiDurumController.gayrimenkulBilgisi.gayrimenkulTuru}">
+                                <f:selectItems value="#{maddiDurumController.gayrimenkulTuruList}" 
+                                             var="gmTuru" 
+                                             itemLabel="#{gmTuru.label}" 
+                                             itemValue="#{gmTuru}"/>
+                            </p:selectOneMenu>
+                        </div>
+                    </p:panel>
+                    </h:panelGroup>
+                    
+                    <!-- Açıklama -->
+                    <div class="form-field" style="grid-column: 1 / -1;">
+                        <p:outputLabel for="maddiDurumAciklama" value="Açıklama"/>
+                        <p:inputTextarea id="maddiDurumAciklama" 
+                                       value="#{maddiDurumController.gayrimenkulBilgisi.gayrimenkulAciklama}"
+                                       rows="3"
+                                       placeholder="Hane halkının maddi durumuna ilişkin gözlemler..."/>
+                    </div>
+                </div>
+            </p:panel>
+        </div>
+        
+        <!-- Footer - Kayıt İşlemleri -->
+        <div class="card-footer" style="justify-content: space-between;">
+            <h:panelGroup id="footerOzet" styleClass="ozetKartlar" layout="block">
+            <div>
+                <i class="fas fa-info-circle" style="color: var(--info-color);"></i>
+                <span style="margin-left: 10px;">
+                    Toplam Gelir: <strong><h:outputText value="#{maddiDurumController.toplamGelir}"><f:convertNumber type="currency" currencySymbol="₺"/></h:outputText></strong> | 
+                    Toplam Borç: <strong><h:outputText value="#{maddiDurumController.toplamBorc}"><f:convertNumber type="currency" currencySymbol="₺"/></h:outputText></strong> | 
+                    Net: <strong style="color: #{maddiDurumController.netGelir >= 0 ? 'var(--success-color)' : 'var(--error-color)'};">
+                        <h:outputText value="#{maddiDurumController.netGelir}"><f:convertNumber type="currency" currencySymbol="₺"/></h:outputText>
+                    </strong>
+                </span>
+            </div>
+            </h:panelGroup>
+            
+            <div style="display: flex; gap: 10px;">
+                <!-- Kaydet-->
+                <p:commandButton value="Kaydet" 
+                               icon="pi pi-save" 
+                               styleClass="ui-button-success"
+                               action="#{maddiDurumController.saveMaddiDurum}" 
+                               update="@(.gelirPanel) @(.borcPanel) @(.ozetKartlar) @(.footerOzet)" 
+                               process="mainForm:tabView:maddiDurumKart"/>
+                
+                <!-- Temizle-->
+                <p:commandButton value="Temizle" 
+                               icon="pi pi-refresh" 
+                               styleClass="ui-button-secondary"
+                               action="#{maddiDurumController.temizle}" 
+                               update="@(.gelirPanel) @(.borcPanel) @(.ozetKartlar) @(.footerOzet)" 
+                               process="@this">
+                    <p:confirm message="Tüm alanlar temizlenecek. Devam edilsin mi?"/>
+                </p:commandButton>
+                
+                <!-- Tahkikat Formu Yazdır-->
+                <p:commandButton value="Tahkikat Formu Yazdır" 
+                               icon="pi pi-print" 
+                               styleClass="ui-button-help"
+                               ajax="false"
+                               onclick="window.print(); return false;"/>
+                
+                <!-- Devam Et (Sadece Komisyonlu Müracaatlarda) -->
+                <p:commandButton value="Kaydet ve Tahkikata Sevk Et →" 
+                               icon="pi pi-arrow-right" 
+                               iconPos="right"
+                               styleClass="ui-button-info"
+                               action="#{maddiDurumController.saveMaddiDurumVeIleri}" 
+                               update="mainForm:tabView growl" 
+                               process="mainForm:tabView:maddiDurumKart"
+                               rendered="#{muracaatController.komisyonKararli}"/>
+            </div>
+        </div>
+    </h:panelGroup>
+    
+    <!-- Confirm Dialog -->
+    <p:confirmDialog global="true">
+        <p:commandButton value="Evet" type="button" styleClass="ui-button-success ui-confirmdialog-yes"/>
+        <p:commandButton value="Hayır" type="button" styleClass="ui-button-danger ui-confirmdialog-no"/>
+    </p:confirmDialog>
+
+</ui:composition>
+

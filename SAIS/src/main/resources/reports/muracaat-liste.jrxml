@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="muracaat-liste" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30"
+              topMargin="20" bottomMargin="20">
+
+    <parameter name="RAPOR_BASLIGI" class="java.lang.String"/>
+    <parameter name="RAPOR_TARIHI" class="java.lang.String"/>
+    <parameter name="TOPLAM_KAYIT" class="java.lang.Integer"/>
+
+    <field name="id" class="java.lang.Long"/>
+    <field name="muracaatNo" class="java.lang.Long"/>
+    <field name="basvuruSahibi.ad" class="java.lang.String"/>
+    <field name="basvuruSahibi.soyad" class="java.lang.String"/>
+    <field name="basvuruSahibi.tcKimlikNo" class="java.lang.String"/>
+    <field name="muracaatTarihi" class="java.time.LocalDate"/>
+    <field name="durum" class="com.sais.enums.MuracaatDurum"/>
+
+    <variable name="SIRA_NO" class="java.lang.Integer" calculation="Count">
+        <initialValueExpression><![CDATA[0]]></initialValueExpression>
+    </variable>
+
+    <title>
+        <band height="60">
+            <textField>
+                <reportElement x="0" y="10" width="535" height="25"/>
+                <textElement textAlignment="Center">
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{RAPOR_BASLIGI}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="435" y="40" width="100" height="15"/>
+                <textElement textAlignment="Right">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Tarih: " + $P{RAPOR_TARIHI}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="25">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="30" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[No]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="30" y="0" width="60" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[M.No]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="90" y="0" width="130" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Basvuru Sahibi]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="220" y="0" width="95" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[TC Kimlik]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="315" y="0" width="80" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[M.Tarihi]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="395" y="0" width="140" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Durum]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="30" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$V{SIRA_NO}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="30" y="0" width="60" height="20"/>
+                <box leftPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{muracaatNo}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="90" y="0" width="130" height="20"/>
+                <box leftPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{basvuruSahibi.ad} + " " + $F{basvuruSahibi.soyad}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="220" y="0" width="95" height="20"/>
+                <box leftPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{basvuruSahibi.tcKimlikNo}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="315" y="0" width="80" height="20"/>
+                <box leftPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{muracaatTarihi} != null ? java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy").format($F{muracaatTarihi}) : ""]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="395" y="0" width="140" height="20"/>
+                <box leftPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{durum}.name()]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="25">
+            <textField>
+                <reportElement x="0" y="5" width="200" height="15"/>
+                <textElement>
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Toplam: " + $P{TOPLAM_KAYIT}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="435" y="5" width="100" height="15"/>
+                <textElement textAlignment="Right">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Sayfa " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+</jasperReport>

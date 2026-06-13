@@ -1,0 +1,16 @@
+jasper:
+  reports:
+   
+    directory: classpath:reports/
+    cache-enabled: true
+    default-font: DejaVu Sans
+    pdf:
+      encoding: UTF-8
+      force-linebreak: true
+    excel:
+      detect-cell-type: true
+      one-page-per-sheet: false
+
+logging:
+  level:
+    net.sf.jasperreports: WARN

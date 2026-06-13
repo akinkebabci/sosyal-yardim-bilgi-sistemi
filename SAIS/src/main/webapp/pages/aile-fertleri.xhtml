@@ -1,0 +1,772 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core">
+
+    <f:event type="preRenderView" listener="#{aileFertController.loadAileFertleri(muracaatId)}"/>
+
+    <div class="card">
+        <h3 class="card-header">
+            <i class="fas fa-users"></i> Aile Fertleri Bilgileri
+        </h3>
+        
+        <div class="card-body">
+            <!-- Son Müracaatlardan Getir Butonu -->
+            <p:panel header="Hızlı İşlemler" style="margin-bottom: 20px;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <p:commandButton value="Yakınları Otomatik Getir (MERNİS)" 
+                                   icon="pi pi-users" 
+                                   styleClass="ui-button-success"
+                                   action="#{aileFertController.getirYakinlari}" 
+                                   update="mainForm:tabView growl" 
+                                   process="@this"/>
+                    
+                    <p:commandButton value="Son Müracaatlardan Getir" 
+                                   icon="pi pi-history" 
+                                   styleClass="ui-button-info"
+                                   action="#{aileFertController.oncekiMuracaatFertleriniGetir}" 
+                                   update="mainForm:tabView growl" 
+                                   process="@this"/>
+                </div>
+                
+                <div style="margin-top: 15px; padding: 10px; background: #E3F2FD; border-left: 4px solid #2196F3; border-radius: 4px;">
+                    <i class="fas fa-info-circle" style="color: #2196F3;"></i>
+                    <strong> Bilgi:</strong> Yakınları otomatik getir butonuyla başvuru sahibinin nüfus kaydındaki yakınları sisteme otomatik eklenebilir.
+                </div>
+            </p:panel>
+            
+            <!-- Aile Ferdi Ekleme Formu -->
+            <p:panel header="Yeni Aile Ferdi Ekle" style="margin-bottom: 20px;">
+                <h:panelGroup id="aileFertFormPanel">
+                <div class="form-grid">
+                    <!-- TC Kimlik No -->
+                    <div class="form-field" style="grid-column: 1 / -1;">
+                        <p:outputLabel for="aileFertTc" value="TC Kimlik No" styleClass="required"/>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start;">
+                            <p:inputText id="aileFertTc" 
+                                       value="#{aileFertController.tcKimlikNo}"
+                                       placeholder="TC Kimlik No (11 hane)"
+                                       maxlength="11"
+                                       style="flex: 1; min-width: 200px;"/>
+                            <p:commandButton value="MERNİS Sorgula" 
+                                           icon="pi pi-search" 
+                                           styleClass="ui-button-info"
+                                           action="#{aileFertController.sorgulaMernis}" 
+                                           update="aileFertFormPanel growl" 
+                                           process="@this,aileFertTc"
+                                           style="white-space: nowrap;"/>
+                        </div>
+                    </div>
+                    
+                    <!-- MERNİS Bilgileri (Sorgulandıktan Sonra) -->
+                    <h:panelGroup rendered="#{not empty aileFertController.newAileFert.kisi.id}">
+                        <div class="form-field" style="grid-column: 1 / -1;">
+                            <div style="padding: 15px; background: #E8F5E9; border: 2px solid #4CAF50; border-radius: 8px;">
+                                <h4 style="margin: 0 0 15px 0; color: #2E7D32;">
+                                    <i class="fas fa-user-check"></i> MERNİS Bilgileri
+                                </h4>
+                                <div class="form-grid">
+                                    <!-- Ad Soyad -->
+                                    <div class="form-field">
+                                        <p:outputLabel value="Ad Soyad"/>
+                                        <p:inputText value="#{aileFertController.newAileFert.kisi.ad} #{aileFertController.newAileFert.kisi.soyad}"
+                                                   disabled="true"
+                                                   style="font-weight: 600; background: white;"/>
+                                    </div>
+                                    
+                                    <!-- Doğum Tarihi -->
+                                    <div class="form-field">
+                                        <p:outputLabel value="Doğum Tarihi"/>
+                                        <p:inputText value="#{aileFertController.newAileFert.kisi.dogumTarihi}"
+                                                   disabled="true"
+                                                   style="font-weight: 600; background: white;"/>
+                                    </div>
+                                    
+                                    <!-- TC Kimlik No -->
+                                    <div class="form-field">
+                                        <p:outputLabel value="TC Kimlik No"/>
+                                        <p:inputText value="#{aileFertController.newAileFert.kisi.tcKimlikNo}"
+                                                   disabled="true"
+                                                   style="font-weight: 600; background: white;"/>
+                                    </div>
+                                    
+                                    <!-- Gebze İkameti -->
+                                    <div class="form-field">
+                                        <p:outputLabel value="Gebze İkameti"/>
+                                        <p:badge value="#{aileFertController.newAileFert.kisi.gebzeIkameti ? 'Gebze' : 'Gebze Dışı'}"
+                                                severity="#{aileFertController.newAileFert.kisi.gebzeIkameti ? 'success' : 'danger'}"
+                                                size="large"/>
+                                    </div>
+                                    
+                                    <!-- Adres veya Uyarı -->
+                                    <h:panelGroup rendered="#{aileFertController.newAileFert.kisi.gebzeIkameti}">
+                                        <div class="form-field" style="grid-column: 1 / -1;">
+                                            <p:outputLabel value="Adres"/>
+                                            <p:inputTextarea value="#{aileFertController.newAileFert.kisi.adres}"
+                                                           disabled="true"
+                                                           rows="2"
+                                                           style="background: white;"/>
+                                        </div>
+                                    </h:panelGroup>
+                                    
+                                    <h:panelGroup rendered="#{not aileFertController.newAileFert.kisi.gebzeIkameti}">
+                                        <div class="form-field" style="grid-column: 1 / -1;">
+                                            <div style="padding: 12px; background: #FFEBEE; border: 2px solid #f44336; border-radius: 8px; text-align: center;">
+                                                <i class="fas fa-exclamation-triangle" style="color: #c62828; font-size: 20px;"></i>
+                                                <p style="margin: 8px 0 0 0; color: #c62828; font-weight: 600;">
+                                                    ⚠️ Bu kişi Gebze dışında ikamet ediyor!<br/>
+                                                    Adres bilgisi görüntülenmiyor.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </h:panelGroup>
+                                </div>
+                            </div>
+                        </div>
+                    </h:panelGroup>
+                    
+                    <!-- Yakınlık Kodu -->
+                    <div class="form-field">
+                        <p:outputLabel for="yakinlikKodu" value="Yakınlık" styleClass="required"/>
+                        <p:selectOneMenu id="yakinlikKodu" 
+                                       value="#{aileFertController.newAileFert.yakinlikKodu}"
+                                       required="true"
+                                       converter="omnifaces.SelectItemsConverter">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                            <f:selectItems value="#{aileFertController.yakinlikKodlari}" 
+                                          var="yakinlik"
+                                          itemLabel="#{yakinlik.adi}"
+                                          itemValue="#{yakinlik}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <!-- Meslek -->
+                    <div class="form-field">
+                        <p:outputLabel for="meslek" value="Meslek"/>
+                        <p:selectOneMenu id="meslek" 
+                                       value="#{aileFertController.newAileFert.meslek}"
+                                       converter="omnifaces.SelectItemsConverter">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                            <f:selectItems value="#{aileFertController.meslekler}" 
+                                          var="meslek"
+                                          itemLabel="#{meslek.adi}"
+                                          itemValue="#{meslek}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <!-- SGK Durumu -->
+                    <div class="form-field">
+                        <p:outputLabel for="sgkDurum" value="SGK Durumu"/>
+                        <p:selectOneMenu id="sgkDurum" value="#{aileFertController.newAileFert.sgkDurum}">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                            <f:selectItems value="#{aileFertController.sgkDurumlari}" 
+                                          var="sgkItem"
+                                          itemLabel="#{sgkItem.label}"
+                                          itemValue="#{sgkItem}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <!-- Öğrenim Durumu -->
+                    <div class="form-field">
+                        <p:outputLabel for="ogrenimDurumu" value="Öğrenim Durumu"/>
+                        <p:selectOneMenu id="ogrenimDurumu" value="#{aileFertController.newAileFert.ogrenimDurumu}">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                            <f:selectItems value="#{aileFertController.ogrenimDurumlari}" 
+                                          var="ogrenimItem"
+                                          itemLabel="#{ogrenimItem.label}"
+                                          itemValue="#{ogrenimItem}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <!-- Özel Statü -->
+                    <div class="form-field">
+                        <p:outputLabel for="ozelStatu" value="Özel Statü"/>
+                        <p:selectOneMenu id="ozelStatu" 
+                                       value="#{aileFertController.newAileFert.ozelStatu}"
+                                       converter="omnifaces.SelectItemsConverter">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                            <f:selectItems value="#{aileFertController.ozelStatuler}" 
+                                          var="ozelStatu"
+                                          itemLabel="#{ozelStatu.adi}"
+                                          itemValue="#{ozelStatu}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <!-- Açıklama -->
+                    <div class="form-field" style="grid-column: 1 / -1;">
+                        <p:outputLabel for="aciklama" value="Açıklama"/>
+                        <p:inputTextarea id="aciklama" 
+                                       value="#{aileFertController.newAileFert.aciklama}"
+                                       rows="3"
+                                       placeholder="Aile ferdine ait özel notlar..."/>
+                    </div>
+                </div>
+                
+                <!-- Engelli Bilgisi -->
+                <p:fieldset legend="♿ Engelli Bilgisi (Varsa)" toggleable="true" collapsed="true" style="margin-top: 20px;">
+                    <div style="padding: 10px; background: #FFF3E0; border-left: 4px solid #FF9800; margin-bottom: 15px; border-radius: 4px;">
+                        <i class="fas fa-info-circle" style="color: #FF9800;"></i>
+                        <strong> Bilgi:</strong> Önce ana engel tipini seçiniz, ardından alt engel tipi otomatik olarak listelenecektir.
+                    </div>
+                    
+                    <h:panelGroup id="engelBilgisiPanel">
+                    <div class="form-grid">
+                        <!-- Ana Engel Tipi -->
+                        <div class="form-field">
+                            <p:outputLabel for="anaEngelTipi" value="Ana Engel Tipi" styleClass="required"/>
+                            <p:selectOneMenu id="anaEngelTipi" 
+                                           value="#{aileFertController.selectedAnaEngelTipi}"
+                                           converter="omnifaces.SelectItemsConverter">
+                                <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                                <f:selectItems value="#{aileFertController.anaEngelliTipleri}" 
+                                              var="anaTip"
+                                              itemLabel="#{anaTip.adi}"
+                                              itemValue="#{anaTip}"/>
+                                <p:ajax event="change" 
+                                       listener="#{aileFertController.onAnaEngelTipiChange}"
+                                       update="engelBilgisiPanel"
+                                       process="@this"/>
+                            </p:selectOneMenu>
+                        </div>
+                        
+                        <!-- Alt Engel Tipi (Ana tip seçildikten sonra görünür) -->
+                        <div class="form-field">
+                            <p:outputLabel for="engelliTipi" value="Alt Engel Tipi" styleClass="required"/>
+                            <p:selectOneMenu id="engelliTipi" 
+                                           value="#{aileFertController.engelBilgisi.engelliTipi}"
+                                           converter="omnifaces.SelectItemsConverter"
+                                           disabled="#{empty aileFertController.altEngelliTipleri}">
+                                <f:selectItem itemLabel="#{empty aileFertController.selectedAnaEngelTipi ? 'Önce ana tip seçiniz...' : 'Seçiniz...'}" 
+                                             itemValue="#{null}"/>
+                                <f:selectItems value="#{aileFertController.altEngelliTipleri}" 
+                                              var="altTip"
+                                              itemLabel="#{altTip.adi}"
+                                              itemValue="#{altTip}"/>
+                            </p:selectOneMenu>
+                            <small style="display: block; margin-top: 5px; color: var(--text-secondary);">
+                                <i class="fas fa-arrow-left"></i> 
+                                Önce ana engel tipini seçiniz
+                            </small>
+                        </div>
+                        
+                        <!-- Engel Oranı -->
+                        <div class="form-field">
+                            <p:outputLabel for="engelOrani" value="Engel Oranı (%)" styleClass="required"/>
+                            <p:inputNumber id="engelOrani" 
+                                         value="#{aileFertController.engelBilgisi.engelOrani}"
+                                         minValue="1"
+                                         maxValue="99"
+                                         decimalPlaces="0"
+                                         placeholder="Örn: 40"/>
+                            <small style="display: block; margin-top: 5px; color: var(--text-secondary);">
+                                <i class="fas fa-info-circle"></i> 
+                                En fazla 99 olabilir
+                            </small>
+                        </div>
+                        
+                        <!-- Rapor No -->
+                        <div class="form-field">
+                            <p:outputLabel for="raporNo" value="Rapor No"/>
+                            <p:inputText id="raporNo" 
+                                       value="#{aileFertController.engelBilgisi.raporNo}"
+                                       placeholder="Engel raporu numarası"/>
+                        </div>
+                        
+                        <!-- Rapor Tarihi -->
+                        <div class="form-field">
+                            <p:outputLabel for="raporTarihi" value="Rapor Tarihi"/>
+                            <p:calendar id="raporTarihi" 
+                                      value="#{aileFertController.engelBilgisi.raporTarihi}"
+                                      pattern="dd/MM/yyyy"
+                                      showIcon="true"
+                                      yearRange="c-100:c+0"
+                                      placeholder="Rapor tarihi"/>
+                        </div>
+                        
+                        <!-- Açıklama -->
+                        <div class="form-field" style="grid-column: 1 / -1;">
+                            <p:outputLabel for="engelAciklama" value="Açıklama"/>
+                            <p:inputTextarea id="engelAciklama" 
+                                           value="#{aileFertController.engelBilgisi.aciklama}"
+                                           rows="2"
+                                           placeholder="Engel durumu ile ilgili açıklamalar..."/>
+                        </div>
+                    </div>
+                    </h:panelGroup>
+                </p:fieldset>
+                
+                <!-- Hastalık Bilgisi -->
+                <p:fieldset legend="🏥 Hastalık Bilgisi (Varsa)" toggleable="true" collapsed="true" style="margin-top: 20px;">
+                    <div style="padding: 10px; background: #FFEBEE; border-left: 4px solid #f44336; margin-bottom: 15px; border-radius: 4px;">
+                        <i class="fas fa-info-circle" style="color: #f44336;"></i>
+                        <strong> Bilgi:</strong> Hastalık adını manuel olarak giriniz (Örn: Şeker Hastalığı, Kalp Yetmezliği, Kanser vb.)
+                    </div>
+                    
+                    <div class="form-grid">
+                        <!-- Hastalık Adı (Manuel Giriş) -->
+                        <div class="form-field">
+                            <p:outputLabel for="hastalikAdi" value="Hastalık Adı" styleClass="required"/>
+                            <p:inputText id="hastalikAdi" 
+                                       value="#{aileFertController.hastalikBilgisi.hastalikAdi}"
+                                       placeholder="Örn: Şeker Hastalığı, Kalp Yetmezliği, Kanser"
+                                       maxlength="150"/>
+                            <small style="display: block; margin-top: 5px; color: var(--text-secondary);">
+                                <i class="fas fa-edit"></i> 
+                                Hastalık adını serbest metin olarak yazınız
+                            </small>
+                        </div>
+                        
+                        <!-- Teşhis Tarihi -->
+                        <div class="form-field">
+                            <p:outputLabel for="teshisTarihi" value="Teşhis Tarihi"/>
+                            <p:calendar id="teshisTarihi" 
+                                      value="#{aileFertController.hastalikBilgisi.teshisTarihi}"
+                                      pattern="dd/MM/yyyy"
+                                      showIcon="true"
+                                      yearRange="c-100:c+0"
+                                      placeholder="Teşhis tarihi"/>
+                        </div>
+                        
+                        <!-- Açıklama -->
+                        <div class="form-field" style="grid-column: 1 / -1;">
+                            <p:outputLabel for="hastalikAciklama" value="Açıklama"/>
+                            <p:inputTextarea id="hastalikAciklama" 
+                                           value="#{aileFertController.hastalikBilgisi.aciklama}"
+                                           rows="2"
+                                           placeholder="Hastalık durumu ile ilgili detaylı açıklamalar..."/>
+                        </div>
+                    </div>
+                </p:fieldset>
+                
+                <!-- Butonlar -->
+                <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <p:commandButton value="#{empty aileFertController.newAileFert.id ? 'Aile Ferdini Ekle' : 'Güncelle'}" 
+                                   icon="#{empty aileFertController.newAileFert.id ? 'pi pi-plus' : 'pi pi-check'}" 
+                                   styleClass="#{empty aileFertController.newAileFert.id ? 'ui-button-success' : 'ui-button-warning'}"
+                                   action="#{aileFertController.saveAileFert}" 
+                                   update="mainForm:tabView growl" 
+                                   process="aileFertFormPanel"
+                                   style="flex: 1; min-width: 180px;"/>
+                    
+                    <p:commandButton value="#{empty aileFertController.newAileFert.id ? 'Formu Temizle' : 'Düzenlemeyi İptal Et'}" 
+                                   icon="pi pi-refresh" 
+                                   styleClass="ui-button-secondary"
+                                   action="#{aileFertController.prepareNewAileFert}" 
+                                   update="mainForm:tabView" 
+                                   process="@this"
+                                   immediate="true"
+                                   style="flex: 1; min-width: 180px;"/>
+                </div>
+                </h:panelGroup>
+            </p:panel>
+            
+            <!-- Aile Fertleri Listesi -->
+            <p:panel header="Aile Fertleri Listesi">
+                <p:dataTable value="#{aileFertController.aileFertList}" 
+                           var="fert"
+                           emptyMessage="Aile ferdi kaydı bulunmamaktadır"
+                           paginator="true" 
+                           rows="10"
+                           rowsPerPageTemplate="5,10,20">
+                    
+                    <p:column headerText="Ad Soyad" sortBy="#{fert.kisi.ad}">
+                        <h:outputText value="#{fert.kisi.ad} #{fert.kisi.soyad}"/>
+                    </p:column>
+                    
+                    <p:column headerText="TC No" sortBy="#{fert.kisi.tcKimlikNo}">
+                        <h:outputText value="#{fert.kisi.tcKimlikNo}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Yakınlık" sortBy="#{fert.yakinlikKodu.adi}">
+                        <p:badge value="#{fert.yakinlikKodu.adi}" severity="info"/>
+                    </p:column>
+                    
+                    <p:column headerText="Doğum Tarihi">
+                        <h:outputText value="#{fert.kisi.dogumTarihi}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Adres">
+                        <h:outputText value="#{fert.kisi.adres}" 
+                                     rendered="#{fert.kisi.gebzeIkameti}"
+                                     style="font-size: 12px; max-width: 200px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                     title="#{fert.kisi.adres}"/>
+                        <p:badge value="Gebze Dışı" 
+                                severity="danger"
+                                rendered="#{not fert.kisi.gebzeIkameti}"
+                                title="Adres bilgisi görüntülenmiyor"/>
+                    </p:column>
+                    
+                    <p:column headerText="Meslek">
+                        <h:outputText value="#{fert.meslek ne null ? fert.meslek.adi : '-'}"/>
+                    </p:column>
+                    
+                    <p:column headerText="SGK">
+                        <h:outputText value="#{fert.sgkDurum ne null ? fert.sgkDurum : '-'}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Engel">
+                        <p:badge value="Var" 
+                               severity="warning" 
+                               rendered="#{not empty fert.engelBilgisi}"/>
+                        <h:outputText value="-" rendered="#{empty fert.engelBilgisi}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Hastalık">
+                        <p:badge value="Var" 
+                               severity="danger" 
+                               rendered="#{not empty fert.hastalikBilgisi}"/>
+                        <h:outputText value="-" rendered="#{empty fert.hastalikBilgisi}"/>
+                    </p:column>
+                    
+                    <p:column headerText="İşlemler" style="width: 200px; text-align: center;">
+                        <p:commandButton icon="pi pi-eye" 
+                                       styleClass="ui-button-info ui-button-sm"
+                                       title="Detayları Gör"
+                                       action="#{aileFertController.showDetail(fert)}" 
+                                       oncomplete="PF('detayDialog').show();"
+                                       update="@none"
+                                       process="@this"/>
+                        
+                        <p:commandButton icon="pi pi-pencil" 
+                                       styleClass="ui-button-warning ui-button-sm"
+                                       title="Düzenle"
+                                       action="#{aileFertController.edit(fert)}" 
+                                       update="mainForm:tabView growl" 
+                                       process="@this"/>
+                        
+                        <p:commandButton icon="pi pi-trash" 
+                                       styleClass="ui-button-danger ui-button-sm"
+                                       title="Sil"
+                                       action="#{aileFertController.delete(fert)}" 
+                                       update="mainForm:tabView growl" 
+                                       process="@this">
+                            <p:confirm header="Onay" 
+                                     message="Bu aile ferdini silmek istediğinizden emin misiniz?" 
+                                     icon="pi pi-exclamation-triangle"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+        </div>
+        
+        <!-- Footer Bilgilendirme -->
+        <div class="card-footer" style="justify-content: space-between;">
+            <div>
+                <p:badge value="#{aileFertController.aileFertList.size()}" 
+                       severity="success"/>
+                <span style="margin-left: 10px;">adet aile ferdi kaydedildi</span>
+            </div>
+            
+            <p:commandButton value="Maddi Durum Bilgilerine Geç →" 
+                           icon="pi pi-arrow-right" 
+                           iconPos="right"
+                           styleClass="ui-button-info"
+                           action="#{muracaatController.nextTab}" 
+                           update="mainForm growl" 
+                           process="@this"
+                           rendered="#{not empty aileFertController.aileFertList and muracaatController.komisyonKararli}"/>
+        </div>
+    </div>
+    
+    <!-- Detay Modal (Card dışında ama composition içinde) -->
+    <h:form id="detayForm">
+        <p:dialog id="detayDialog" 
+                  widgetVar="detayDialog" 
+                  header="Aile Ferdi Detay Bilgileri" 
+                  modal="true" 
+                  responsive="true"
+                  width="900"
+                  height="auto"
+                  closeOnEscape="true"
+                  appendTo="@(body)"
+                  dynamic="true"
+                  fitViewport="true"
+                  maximizable="false"
+                  position="center"
+                  blockScroll="true"
+                  style="max-height: 90vh; overflow-y: auto;">
+        
+        <h:panelGroup rendered="#{not empty aileFertController.detayFert}">
+            <div style="padding: 15px;">
+                
+                <!-- Kişi Bilgileri Bölümü -->
+                <p:fieldset legend="👤 Kişi Bilgileri" style="margin-bottom: 15px;">
+                    <div class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div>
+                            <strong>Ad Soyad:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.ad} #{aileFertController.detayFert.kisi.soyad}"
+                                         style="display: block; margin-top: 5px; font-size: 16px;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>TC Kimlik No:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.tcKimlikNo}"
+                                         style="display: block; margin-top: 5px;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Doğum Tarihi:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.dogumTarihi}"
+                                         style="display: block; margin-top: 5px;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Yaş:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.yas} yaşında"
+                                         style="display: block; margin-top: 5px;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Cinsiyet:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.cinsiyet eq 'E' ? 'Erkek' : 'Kadın'}"
+                                         rendered="#{not empty aileFertController.detayFert.kisi.cinsiyet}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.kisi.cinsiyet}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Medeni Durum:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.medeniDurum}"
+                                         rendered="#{not empty aileFertController.detayFert.kisi.medeniDurum}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.kisi.medeniDurum}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Doğum Yeri:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.dogumYeri}"
+                                         rendered="#{not empty aileFertController.detayFert.kisi.dogumYeri}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.kisi.dogumYeri}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Baba Adı:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.babaAdi}"
+                                         rendered="#{not empty aileFertController.detayFert.kisi.babaAdi}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.kisi.babaAdi}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Anne Adı:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.anneAdi}"
+                                         rendered="#{not empty aileFertController.detayFert.kisi.anneAdi}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.kisi.anneAdi}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Telefon:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.telefon}"
+                                         rendered="#{not empty aileFertController.detayFert.kisi.telefon}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.kisi.telefon}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Email:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.email}"
+                                         rendered="#{not empty aileFertController.detayFert.kisi.email}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.kisi.email}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div style="grid-column: 1 / -1;">
+                            <strong>İkamet:</strong>
+                            <p:badge value="#{aileFertController.detayFert.kisi.gebzeIkameti ? 'Gebze' : 'Gebze Dışı'}"
+                                    severity="#{aileFertController.detayFert.kisi.gebzeIkameti ? 'success' : 'danger'}"
+                                    size="large"
+                                    style="display: inline-block; margin-top: 5px;"/>
+                        </div>
+                        
+                        <div style="grid-column: 1 / -1;" rendered="#{aileFertController.detayFert.kisi.gebzeIkameti}">
+                            <strong>Adres:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.kisi.adres}"
+                                         style="display: block; margin-top: 5px; padding: 10px; background: #f5f5f5; border-radius: 5px;"/>
+                        </div>
+                    </div>
+                </p:fieldset>
+                
+                <!-- Aile Ferdi Bilgileri Bölümü -->
+                <p:fieldset legend="👨‍👩‍👧‍👦 Aile Ferdi Bilgileri" style="margin-bottom: 15px;">
+                    <div class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div>
+                            <strong>Yakınlık:</strong>
+                            <p:badge value="#{aileFertController.detayFert.yakinlikKodu.adi}" 
+                                    severity="info" 
+                                    size="large"
+                                    style="display: inline-block; margin-top: 5px;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Meslek:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.meslek.adi}"
+                                         rendered="#{not empty aileFertController.detayFert.meslek}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.meslek}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Yaptığı İş:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.yaptigiIs}"
+                                         rendered="#{not empty aileFertController.detayFert.yaptigiIs}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.yaptigiIs}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>SGK Durumu:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.sgkDurum}"
+                                         rendered="#{not empty aileFertController.detayFert.sgkDurum}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.sgkDurum}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Öğrenim Durumu:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.ogrenimDurumu}"
+                                         rendered="#{not empty aileFertController.detayFert.ogrenimDurumu}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.ogrenimDurumu}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Özel Statü:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.ozelStatu.adi}"
+                                         rendered="#{not empty aileFertController.detayFert.ozelStatu}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.ozelStatu}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div style="grid-column: 1 / -1;" rendered="#{not empty aileFertController.detayFert.aciklama}">
+                            <strong>Açıklama:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.aciklama}"
+                                         style="display: block; margin-top: 5px; padding: 10px; background: #f5f5f5; border-radius: 5px;"/>
+                        </div>
+                    </div>
+                </p:fieldset>
+                
+                <!-- Engel Bilgisi Bölümü -->
+                <p:fieldset legend="♿ Engel Bilgisi" 
+                           style="margin-bottom: 15px;"
+                           rendered="#{not empty aileFertController.detayFert.engelBilgisi}">
+                    <div class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <h:panelGroup rendered="#{not empty aileFertController.detayFert.engelBilgisi.engelliTipi.ustTip}">
+                            <div>
+                                <strong>Ana Engel Tipi:</strong>
+                                <h:outputText value="#{aileFertController.detayFert.engelBilgisi.engelliTipi.ustTip.adi}"
+                                             style="display: block; margin-top: 5px; color: #f57c00; font-weight: 600;"/>
+                            </div>
+                        </h:panelGroup>
+                        
+                        <div>
+                            <strong>Alt Engel Tipi:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.engelBilgisi.engelliTipi.adi}"
+                                         style="display: block; margin-top: 5px; color: #f57c00; font-weight: bold;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Engel Oranı:</strong>
+                            <h:outputText value="%#{aileFertController.detayFert.engelBilgisi.engelOrani}"
+                                         style="display: block; margin-top: 5px; color: #f57c00; font-weight: bold;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Rapor Tarihi:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.engelBilgisi.raporTarihi}"
+                                         rendered="#{not empty aileFertController.detayFert.engelBilgisi.raporTarihi}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.engelBilgisi.raporTarihi}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Rapor No:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.engelBilgisi.raporNo}"
+                                         rendered="#{not empty aileFertController.detayFert.engelBilgisi.raporNo}"
+                                         style="display: block; margin-top: 5px;"/>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.engelBilgisi.raporNo}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div style="grid-column: 1 / -1;" rendered="#{not empty aileFertController.detayFert.engelBilgisi.aciklama}">
+                            <strong>Açıklama:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.engelBilgisi.aciklama}"
+                                         style="display: block; margin-top: 5px; padding: 10px; background: #fff3e0; border-left: 4px solid #f57c00; border-radius: 5px;"/>
+                        </div>
+                    </div>
+                </p:fieldset>
+                
+                <!-- Hastalık Bilgisi Bölümü -->
+                <p:fieldset legend="🏥 Hastalık Bilgisi" 
+                           style="margin-bottom: 15px;"
+                           rendered="#{not empty aileFertController.detayFert.hastalikBilgisi}">
+                    <div class="form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                        <div>
+                            <strong>Hastalık Adı:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.hastalikBilgisi.hastalikAdi}"
+                                         rendered="#{not empty aileFertController.detayFert.hastalikBilgisi.hastalikAdi}"
+                                         style="display: block; margin-top: 5px; color: #d32f2f; font-weight: bold;"/>
+                            <h:outputText value="-" 
+                                         rendered="#{empty aileFertController.detayFert.hastalikBilgisi.hastalikAdi}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div>
+                            <strong>Teşhis Tarihi:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.hastalikBilgisi.teshisTarihi}"
+                                         rendered="#{not empty aileFertController.detayFert.hastalikBilgisi.teshisTarihi}"
+                                         style="display: block; margin-top: 5px;">
+                                <f:convertDateTime pattern="dd.MM.yyyy" type="localDate"/>
+                            </h:outputText>
+                            <h:outputText value="-" rendered="#{empty aileFertController.detayFert.hastalikBilgisi.teshisTarihi}"
+                                         style="display: block; margin-top: 5px; color: #999;"/>
+                        </div>
+                        
+                        <div style="grid-column: 1 / -1;" rendered="#{not empty aileFertController.detayFert.hastalikBilgisi.aciklama}">
+                            <strong>Açıklama:</strong>
+                            <h:outputText value="#{aileFertController.detayFert.hastalikBilgisi.aciklama}"
+                                         style="display: block; margin-top: 5px; padding: 10px; background: #ffebee; border-left: 4px solid #d32f2f; border-radius: 5px;"/>
+                        </div>
+                    </div>
+                </p:fieldset>
+                
+                
+                <p:panel rendered="#{empty aileFertController.detayFert.engelBilgisi and empty aileFertController.detayFert.hastalikBilgisi}"
+                         style="margin-bottom: 0; background: #e8f5e9; border: 1px solid #4caf50;">
+                    <div style="text-align: center; padding: 15px;">
+                        <i class="fas fa-check-circle" style="color: #4caf50; font-size: 24px;"></i>
+                        <p style="margin: 10px 0 0 0; color: #2e7d32; font-weight: 600;">
+                            Bu kişiye ait engel veya hastalık kaydı bulunmamaktadır.
+                        </p>
+                    </div>
+                </p:panel>
+                
+            </div>
+        </h:panelGroup>
+        
+        <f:facet name="footer">
+            <p:commandButton value="Kapat" 
+                           icon="pi pi-times" 
+                           styleClass="ui-button-secondary"
+                           onclick="PF('detayDialog').hide(); return false;"/>
+        </f:facet>
+        </p:dialog>
+    </h:form>
+
+</ui:composition>
+

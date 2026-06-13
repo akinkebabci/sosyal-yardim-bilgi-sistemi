@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core">
+
+<ui:composition template="/templates/layout.xhtml">
+    
+    <ui:define name="title">Müracaat İşlemleri - SAIS</ui:define>
+    
+    <ui:define name="pageTitle">Müracaat İşlemleri</ui:define>
+    
+    <ui:define name="content">
+        <p:growl id="growl" showDetail="true" life="5000" sticky="false"/>
+        
+        <h:form id="mainForm" enctype="multipart/form-data">
+            <!-- Breadcrumb -->
+            <div class="content-header">
+                <div class="content-breadcrumb">
+                    <span>Ana Sayfa</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Müracaat İşlemleri</span>
+                </div>
+            </div>
+        
+        <!-- İstatistik Kartları -->
+        <h:panelGroup id="statsCards" layout="block" styleClass="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Bekleyen Müracaatlar</div>
+                <div class="stat-value">
+                    #{muracaatController.bekleyenMuracaatSayisi}
+                    <i class="fas fa-clock stat-icon"></i>
+                </div>
+            </div>
+            
+            <div class="stat-card success">
+                <div class="stat-title">Sonuçlanan</div>
+                <div class="stat-value">
+                    #{muracaatController.sonuclananMuracaatSayisi}
+                    <i class="fas fa-check-circle stat-icon"></i>
+                </div>
+            </div>
+            
+            <div class="stat-card warning">
+                <div class="stat-title">Tahkikatta</div>
+                <div class="stat-value">
+                    #{muracaatController.tahkikattaMuracaatSayisi}
+                    <i class="fas fa-search stat-icon"></i>
+                </div>
+            </div>
+            
+            <div class="stat-card error">
+                <div class="stat-title">Red Edilenler</div>
+                <div class="stat-value">
+                    0
+                    <i class="fas fa-times-circle stat-icon"></i>
+                </div>
+            </div>
+        </h:panelGroup>
+        
+        <!-- Ana İçerik -->
+        <div class="content-body">
+                
+                <!-- Toolbar -->
+                <p:toolbar id="toolbar" style="margin-bottom: 20px;">
+                    <p:toolbarGroup>
+                        <p:commandButton value="Yeni Müracaat" 
+                                       icon="pi pi-plus" 
+                                       styleClass="ui-button-success"
+                                       action="#{muracaatController.newMuracaat}" 
+                                       update="mainForm" 
+                                       process="@this"/>
+                        
+                        <p:commandButton value="Müracaatlar" 
+                                       icon="pi pi-list" 
+                                       styleClass="ui-button-info"
+                                       action="#{muracaatController.tumMuracaatlariGoster}" 
+                                       update="tumMuracaatlarTable" 
+                                       process="@this"
+                                       oncomplete="PF('tumMuracaatlarDialogVar').show();"
+                                       title="Tamamlanan ve bekleyen müracaatları göster"/>
+                    </p:toolbarGroup>
+                    
+                    <p:toolbarGroup align="right">
+                        <h:panelGroup rendered="#{not empty muracaatController.selectedMuracaat}">
+                            <p:outputLabel value="Durum: " style="font-weight:bold; margin-right:10px;"/>
+                            <p:badge value="#{muracaatController.selectedMuracaat.durum.label}" 
+                                   severity="#{muracaatController.selectedMuracaat.durum eq 'SONUCLANDI' ? 'success' : 'warning'}"/>
+                        </h:panelGroup>
+                    </p:toolbarGroup>
+                </p:toolbar>
+                
+                <!-- Tab View - Adım Adım İlerleme -->
+                <h:panelGroup rendered="#{not empty muracaatController.selectedMuracaat}">
+                <p:tabView id="tabView" 
+                          activeIndex="#{muracaatController.activeTabIndex}" 
+                          dynamic="true" 
+                          cache="true">
+                    <p:ajax event="tabChange" listener="#{muracaatController.onTabChange}"/>
+                    
+                    <!-- 1. MÜRACAAT BİLGİLERİ TAB -->
+                    <p:tab title="1. Başvuru Bilgileri" icon="pi pi-file-edit" disabled="false">
+                        <div class="card">
+                            <h3 class="card-header">
+                                <i class="fas fa-file-alt"></i> Müracaat Bilgileri
+                            </h3>
+                            
+                            <h:panelGroup id="basvuruBilgileriPanel">
+                            <div class="card-body">
+                                <!-- Temel Bilgiler -->
+                                <p:panel header="Temel Bilgiler" style="margin-bottom: 20px;">
+                                    <div class="form-grid">
+                                        <!-- Müracaat Tarihi -->
+                                        <div class="form-field">
+                                            <p:outputLabel for="muracaatTarihi" value="Müracaat Tarihi" styleClass="required"/>
+                                            <p:calendar id="muracaatTarihi" 
+                                                      value="#{muracaatController.selectedMuracaat.muracaatTarihi}"
+                                                      pattern="dd/MM/yyyy"
+                                                      showIcon="true"
+                                                      required="true"
+                                                      requiredMessage="Müracaat tarihi zorunludur"/>
+                                        </div>
+                                        
+                                        <!-- Komisyon Kararlı mı? -->
+                                        <div class="form-field">
+                                            <p:outputLabel for="komisyonKararli" value="Komisyon Kararlı mı?" styleClass="required"/>
+                                            <p:selectBooleanCheckbox id="komisyonKararli" 
+                                                                    value="#{muracaatController.komisyonKararli}">
+                                                <p:ajax event="change" 
+                                                       listener="#{muracaatController.onKomisyonKararliChange}"
+                                                       update="yardimTalepleriContainer"/>
+                                            </p:selectBooleanCheckbox>
+                                            <small style="display: block; margin-top: 5px; color: var(--text-secondary);">
+                                                <i class="fas fa-info-circle"></i> 
+                                                İşaretlenirse komisyon kararı ile verilecek yardımlar da listelenir
+                                            </small>
+                                        </div>
+                                    </div>
+                                </p:panel>
+                                
+                                <!-- Başvuru Sahibi Bilgileri -->
+                                <p:panel header="Başvuru Sahibi Bilgileri" style="margin-bottom: 20px;">
+                                    <div class="form-grid">
+                                        <!-- Kendisi mi Başvurdu? -->
+                                        <div class="form-field" style="grid-column: 1 / -1;">
+                                            <p:outputLabel for="kendisiBasvurdu" value="Başvuruyu Kimlik Sahibi mi Yaptı?" styleClass="required"/>
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                            <p:selectBooleanCheckbox id="kendisiBasvurdu" 
+                                                                    value="#{muracaatController.kendisiBasvurdu}">
+                                                    <p:ajax event="change" update="adinaBasvurulanPanel tcKimlikNoLabel"/>
+                                            </p:selectBooleanCheckbox>
+                                                <span style="font-weight: 500;">
+                                                    #{muracaatController.kendisiBasvurdu ? '✅ Evet, kendisi başvurdu' : '❌ Hayır, başka biri adına'}
+                                                </span>
+                                            </div>
+                                            <small style="display: block; margin-top: 5px; color: var(--text-secondary);">
+                                                <i class="fas fa-info-circle"></i> 
+                                                İşaretlenirse başvuru sahibi kendisidir, işaretlenmezse başka biri adına başvuru yapılmıştır
+                                            </small>
+                                        </div>
+                                        
+                                        <!-- TC Kimlik No (Başvuru Sahibi) -->
+                                        <div class="form-field" style="grid-column: 1 / -1;">
+                                            <h:panelGroup id="tcKimlikNoLabel">
+                                            <p:outputLabel for="tcKimlikNo" 
+                                                             value="#{muracaatController.kendisiBasvurdu ? 'Başvuru Sahibi (Kendisi) TC No' : 'Başvuruyu Yapan Kişinin TC No'}" 
+                                                         styleClass="required"/>
+                                                <small style="display: block; margin-bottom: 5px; color: var(--text-secondary);">
+                                                    #{muracaatController.kendisiBasvurdu ? 
+                                                        '💡 Başvuru sahibinin kendi TC kimlik numarası' : 
+                                                        '💡 Başka biri adına başvuru yapan kişinin TC kimlik numarası'}
+                                                </small>
+                                            </h:panelGroup>
+                                            <div style="display: flex; gap: 10px;">
+                                                <p:inputText id="tcKimlikNo" 
+                                                           value="#{muracaatController.tcKimlikNo}"
+                                                           placeholder="TC Kimlik No (11 hane)"
+                                                           maxlength="11"
+                                                           required="true"
+                                                           style="flex: 1;"/>
+                                                <p:commandButton value="MERNİS Sorgula" 
+                                                               icon="pi pi-search" 
+                                                               styleClass="ui-button-info"
+                                                               action="#{muracaatController.mernistenKisiSorgula}" 
+                                                               update="mainForm growl" 
+                                                               process="@this,tcKimlikNo"/>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <h:panelGroup rendered="#{muracaatController.selectedMuracaat.basvuruSahibi ne null and muracaatController.selectedMuracaat.basvuruSahibi.id ne null}">
+                                            <div class="form-field" style="grid-column: 1 / -1;">
+                                                <div style="padding: 15px; background: #E8F5E9; border: 2px solid #4CAF50; border-radius: 8px; margin-top: 10px;">
+                                                    <h4 style="margin: 0 0 15px 0; color: #2E7D32;">
+                                                        <i class="fas fa-user-check"></i> 
+                                                        #{muracaatController.kendisiBasvurdu ? 'Başvuru Sahibi (Kendisi) - MERNİS Bilgileri' : 'Başvuruyu Yapan Kişi - MERNİS Bilgileri'}
+                                                    </h4>
+                                                    <div class="form-grid">
+                                                        <!-- Ad Soyad -->
+                                            <div class="form-field">
+                                                <p:outputLabel value="Ad Soyad"/>
+                                                <p:inputText value="#{muracaatController.selectedMuracaat.basvuruSahibi.ad} #{muracaatController.selectedMuracaat.basvuruSahibi.soyad}"
+                                                           disabled="true"
+                                                                       style="font-weight: 600; background: white;"/>
+                                            </div>
+                                            
+                                                        <!-- Doğum Tarihi -->
+                                            <div class="form-field">
+                                                <p:outputLabel value="Doğum Tarihi"/>
+                                                <p:inputText value="#{muracaatController.selectedMuracaat.basvuruSahibi.dogumTarihi}"
+                                                           disabled="true"
+                                                                       style="font-weight: 600; background: white;"/>
+                                                        </div>
+                                                        
+                                                        <!-- TC Kimlik No -->
+                                                        <div class="form-field">
+                                                            <p:outputLabel value="TC Kimlik No"/>
+                                                            <p:inputText value="#{muracaatController.selectedMuracaat.basvuruSahibi.tcKimlikNo}"
+                                                                       disabled="true"
+                                                                       style="font-weight: 600; background: white;"/>
+                                                        </div>
+                                                        
+                                                        <!-- Gebze İkameti -->
+                                                        <div class="form-field">
+                                                            <p:outputLabel value="Gebze İkameti"/>
+                                                            <p:badge value="#{muracaatController.selectedMuracaat.basvuruSahibi.gebzeIkameti ? 'Gebze' : 'Gebze Dışı'}"
+                                                                    severity="#{muracaatController.selectedMuracaat.basvuruSahibi.gebzeIkameti ? 'success' : 'danger'}"
+                                                                    size="large"/>
+                                            </div>
+                                            
+                                                        <!-- Adres veya Uyarı -->
+                                                        <h:panelGroup rendered="#{muracaatController.selectedMuracaat.basvuruSahibi.gebzeIkameti}">
+                                            <div class="form-field" style="grid-column: 1 / -1;">
+                                                <p:outputLabel value="Adres"/>
+                                                <p:inputTextarea value="#{muracaatController.selectedMuracaat.basvuruSahibi.adres}"
+                                                               disabled="true"
+                                                                               rows="2"
+                                                                               style="background: white;"/>
+                                            </div>
+                                                        </h:panelGroup>
+                                            
+                                                        <h:panelGroup rendered="#{not muracaatController.selectedMuracaat.basvuruSahibi.gebzeIkameti}">
+                                            <div class="form-field" style="grid-column: 1 / -1;">
+                                                                <div style="padding: 12px; background: #FFEBEE; border: 2px solid #f44336; border-radius: 8px; text-align: center;">
+                                                                    <i class="fas fa-exclamation-triangle" style="color: #c62828; font-size: 20px;"></i>
+                                                                    <p style="margin: 8px 0 0 0; color: #c62828; font-weight: 600;">
+                                                                        ⚠️ GEBZE DIŞINDA İKAMET - BAŞVURU KABUL EDİLMEZ!
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                </h:panelGroup>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>
+                                    </div>
+                                </p:panel>
+                                
+                                <!-- Adına Başvurulan Kişi (Kendisi başvurmadıysa) -->
+                                <h:panelGroup id="adinaBasvurulanPanel">
+                                    <p:panel header="⚠️ Adına Başvurulan Kişi (Asıl Başvuru Sahibi)" 
+                                        rendered="#{not muracaatController.kendisiBasvurdu}"
+                                            style="margin-bottom: 20px; border-left: 4px solid #FF9800;">
+                                        <div style="padding: 10px; background: #FFF3E0; border-radius: 4px; margin-bottom: 15px;">
+                                            <i class="fas fa-info-circle" style="color: #FF9800;"></i>
+                                            <strong> Dikkat:</strong> Başvuruyu başka biri yaptığı için, 
+                                            <strong>asıl yardım alacak kişinin</strong> bilgilerini giriniz.
+                                        </div>
+                                        
+                                    <div class="form-grid">
+                                            <div class="form-field" style="grid-column: 1 / -1;">
+                                                <p:outputLabel for="adinaBasvurulanTc" 
+                                                             value="Asıl Başvuru Sahibi (Yardım Alacak Kişi) TC No" 
+                                                             styleClass="required"/>
+                                                <small style="display: block; margin-bottom: 5px; color: var(--text-secondary);">
+                                                    💡 Yardımdan faydalanacak asıl kişinin TC kimlik numarası
+                                                </small>
+                                            <div style="display: flex; gap: 10px;">
+                                                <p:inputText id="adinaBasvurulanTc" 
+                                                           value="#{muracaatController.adinaBasvurulanTcNo}"
+                                                           placeholder="TC Kimlik No (11 hane)"
+                                                           maxlength="11"
+                                                           required="#{not muracaatController.kendisiBasvurdu}"
+                                                           style="flex: 1;"/>
+                                                    <p:commandButton value="MERNİS Sorgula" 
+                                                               icon="pi pi-search" 
+                                                                   styleClass="ui-button-warning"
+                                                               action="#{muracaatController.adinaBasvurulanKisiSorgula}" 
+                                                               update="mainForm growl" 
+                                                               process="@this,adinaBasvurulanTc"/>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Adına Başvurulan Kişi Bilgileri -->
+                                            <h:panelGroup rendered="#{not empty muracaatController.selectedMuracaat.adinaBasvurulanKisi}"
+                                                         style="grid-column: 1 / -1;">
+                                                <div style="padding: 15px; background: #E8F5E9; border: 2px solid #4CAF50; border-radius: 8px; margin-top: 10px;">
+                                                    <h4 style="margin: 0 0 10px 0; color: #2E7D32;">
+                                                        ✅ Asıl Başvuru Sahibi (Yardım Alacak Kişi)
+                                                    </h4>
+                                                    <div class="form-grid">
+                                            <div class="form-field">
+                                                <p:outputLabel value="Ad Soyad"/>
+                                                <p:inputText value="#{muracaatController.selectedMuracaat.adinaBasvurulanKisi.ad} #{muracaatController.selectedMuracaat.adinaBasvurulanKisi.soyad}"
+                                                           disabled="true"
+                                                                       style="font-weight: 600; background: white;"/>
+                                                        </div>
+                                                        
+                                                        <div class="form-field">
+                                                            <p:outputLabel value="TC Kimlik No"/>
+                                                            <p:inputText value="#{muracaatController.selectedMuracaat.adinaBasvurulanKisi.tcKimlikNo}"
+                                                                       disabled="true"
+                                                                       style="font-weight: 600; background: white;"/>
+                                                        </div>
+                                                        
+                                                        <div class="form-field">
+                                                            <p:outputLabel value="Doğum Tarihi"/>
+                                                            <p:inputText value="#{muracaatController.selectedMuracaat.adinaBasvurulanKisi.dogumTarihi}"
+                                                                       disabled="true"
+                                                                       style="font-weight: 600; background: white;"/>
+                                                        </div>
+                                                        
+                                                        <!-- Gebze İkameti -->
+                                                        <div class="form-field">
+                                                            <p:outputLabel value="Gebze İkameti"/>
+                                                            <p:badge value="#{muracaatController.selectedMuracaat.adinaBasvurulanKisi.gebzeIkameti ? 'Gebze' : 'Gebze Dışı'}"
+                                                                    severity="#{muracaatController.selectedMuracaat.adinaBasvurulanKisi.gebzeIkameti ? 'success' : 'danger'}"
+                                                                    size="large"/>
+                                                        </div>
+                                                        
+                                                        <!-- Adres veya Uyarı -->
+                                                        <h:panelGroup rendered="#{muracaatController.selectedMuracaat.adinaBasvurulanKisi.gebzeIkameti}">
+                                                            <div class="form-field" style="grid-column: 1 / -1;">
+                                                                <p:outputLabel value="Adres"/>
+                                                                <p:inputTextarea value="#{muracaatController.selectedMuracaat.adinaBasvurulanKisi.adres}"
+                                                                               disabled="true"
+                                                                               rows="2"
+                                                                               style="background: white;"/>
+                                                            </div>
+                                                        </h:panelGroup>
+                                                        
+                                                        <h:panelGroup rendered="#{not muracaatController.selectedMuracaat.adinaBasvurulanKisi.gebzeIkameti}">
+                                                            <div class="form-field" style="grid-column: 1 / -1;">
+                                                                <div style="padding: 12px; background: #FFEBEE; border: 2px solid #f44336; border-radius: 8px; text-align: center;">
+                                                                    <i class="fas fa-exclamation-triangle" style="color: #c62828; font-size: 20px;"></i>
+                                                                    <p style="margin: 8px 0 0 0; color: #c62828; font-weight: 600;">
+                                                                        ⚠️ GEBZE DIŞINDA İKAMET - BAŞVURU KABUL EDİLMEZ!
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </h:panelGroup>
+                                                    </div>
+                                            </div>
+                                        </h:panelGroup>
+                                    </div>
+                                </p:panel>
+                                </h:panelGroup>
+                                
+                                <!-- Başvuru Detayları -->
+                                <p:panel header="Başvuru Detayları" style="margin-bottom: 20px;">
+                                    <div class="form-grid">
+                                        <!-- Başvuru Metni -->
+                                        <div class="form-field" style="grid-column: 1 / -1;">
+                                            <p:outputLabel for="basvuruMetni" value="Başvuru Metni" styleClass="required"/>
+                                            <p:inputTextarea id="basvuruMetni" 
+                                                           value="#{muracaatController.basvuruMetni}"
+                                                           rows="6"
+                                                           maxlength="1000"
+                                                           counter="charCounter"
+                                                           counterTemplate="{0} karakter kaldı"
+                                                           required="true"
+                                                           requiredMessage="Başvuru metni girilmelidir (en az 10 karakter)"
+                                                           placeholder="Başvuru sahibinin talebini ve durumunu detaylıca yazınız... (En az 10 karakter)"/>
+                                            <h:outputText id="charCounter"/>
+                                        </div>
+                                        
+                                        <!-- Personel Görüş Notu -->
+                                        <div class="form-field" style="grid-column: 1 / -1;">
+                                            <p:outputLabel for="personelNotu" value="Personel Görüş Notu"/>
+                                            <p:inputTextarea id="personelNotu" 
+                                                           value="#{muracaatController.personelGorusNotu}"
+                                                           rows="4"
+                                                           maxlength="500"
+                                                           placeholder="Sosyal inceleme yapan personelin değerlendirme notu..."/>
+                                        </div>
+                                        
+                                        <!-- Doküman Yönetimi -->
+                                        <div class="form-field" style="grid-column: 1 / -1;">
+                                            <p:outputLabel value="Doküman Yönetimi" style="font-weight: 600; font-size: 16px; display: block; margin-bottom: 15px;"/>
+                                            
+                                            <h:panelGroup id="dokumanYonetimPanel">
+                                                <!-- Dosya Yükleme Alanı -->
+                                                <p:panel header="📎 Yeni Doküman Yükle" 
+                                                        style="margin-bottom: 20px;"
+                                                        toggleable="true"
+                                                        collapsed="#{not empty muracaatController.selectedMuracaat.id}">
+                                                    
+                                                    <!-- Bilgilendirme -->
+                                                    <div style="padding: 10px; background: #E3F2FD; border-left: 4px solid #2196F3; margin-bottom: 15px; border-radius: 4px;">
+                                                        <i class="fas fa-info-circle" style="color: #2196F3;"></i>
+                                                        <strong> Bilgi:</strong>
+                                                        <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                                                            <li>İzin verilen dosya türleri: <strong>PDF, DOC, DOCX, JPG, PNG, XLS, XLSX</strong></li>
+                                                            <li>Maksimum dosya boyutu: <strong>10 MB</strong></li>
+                                                            <li>Birden fazla dosya yükleyebilirsiniz</li>
+                                                            <li><strong>Dosyaları önce seçin, sonra "Kaydet ve Devam Et" butonuna basın</strong></li>
+                                                            <li>Dosyalar <strong>#{muracaatController.selectedMuracaat.basvuruSahibi ne null ? muracaatController.selectedMuracaat.basvuruSahibi.ad : 'Başvuru Sahibi'}_#{muracaatController.selectedMuracaat.basvuruSahibi ne null ? muracaatController.selectedMuracaat.basvuruSahibi.soyad : 'Soyad'}</strong> klasörüne kaydedilecek</li>
+                                                        </ul>
+                                                    </div>
+                                                    
+                                                    <!-- Geçici Dosyalar Bilgisi -->
+                                                    <h:panelGroup rendered="#{muracaatDokumanController.geciciDosyaSayisi > 0}">
+                                                        <div style="padding: 10px; background: #FFF3E0; border-left: 4px solid #FF9800; margin-bottom: 15px; border-radius: 4px;">
+                                                            <i class="fas fa-clock" style="color: #FF9800;"></i>
+                                                            <strong> #{muracaatDokumanController.geciciDosyaSayisi} dosya eklendi</strong> - 
+                                                            "Kaydet ve Devam Et" butonuna basınca yüklenecek
+                                                        </div>
+                                                    </h:panelGroup>
+                                                    
+                                                    <!-- Dosya Yükleme Bileşeni -->
+                                                    <p:fileUpload 
+                                                        listener="#{muracaatDokumanController.handleFileUpload}"
+                                                        mode="advanced" 
+                                                        auto="true"
+                                                        multiple="true"
+                                                        dragDropSupport="true"
+                                                        label="Dosya Seç"
+                                                        uploadLabel="Yükle"
+                                                        cancelLabel="İptal"
+                                                        chooseIcon="pi pi-file"
+                                                        uploadIcon="pi pi-upload"
+                                                        cancelIcon="pi pi-times"
+                                                        allowTypes="/(\.|\/)(pdf|doc|docx|jpg|jpeg|png|gif|xls|xlsx|txt)$/"
+                                                        maxFileSize="10485760"
+                                                        invalidFileMessage="Geçersiz dosya türü! Sadece PDF, DOC, DOCX, JPG, PNG, XLS, XLSX, TXT dosyaları yükleyebilirsiniz."
+                                                        fileLimitMessage="Maksimum dosya boyutu 10MB'dır!"
+                                                        update="dokumanTable growl"
+                                                        onupload="console.log('Dosya yüklendi!');"
+                                                        styleClass="custom-upload"/>
+                                                </p:panel>
+                                                
+                                                <!-- Yüklü Dokümanlar Listesi -->
+                                                <p:panel header="📄 Yüklü Dokümanlar" 
+                                                        style="margin-bottom: 20px;"
+                                                        rendered="#{not empty muracaatController.selectedMuracaat.id}">
+                                                    <p:dataTable id="dokumanTable" 
+                                                                value="#{muracaatDokumanController.dokumanList}" 
+                                                                var="dokuman"
+                                                                emptyMessage="Henüz doküman yüklenmemiş."
+                                                                paginator="true"
+                                                                rows="10"
+                                                                paginatorPosition="bottom"
+                                                                paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                                                currentPageReportTemplate="📄 Toplam {totalRecords} doküman (Gösterilen: {startRecord}-{endRecord})"
+                                                                rowsPerPageTemplate="5,10,15"
+                                                                styleClass="custom-datatable">
+                                                        
+                                                        <!-- Dosya İkonu -->
+                                                        <p:column style="width: 50px; text-align: center;">
+                                                            <i class="fas fa-file-#{dokuman.dosyaTipi.contains('pdf') ? 'pdf' : 
+                                                                                    dokuman.dosyaTipi.contains('word') ? 'word' : 
+                                                                                    dokuman.dosyaTipi.contains('excel') ? 'excel' : 
+                                                                                    dokuman.dosyaTipi.contains('image') ? 'image' : 'alt'}" 
+                                                               style="font-size: 24px; color: #{dokuman.dosyaTipi.contains('pdf') ? '#dc3545' : 
+                                                                                              dokuman.dosyaTipi.contains('word') ? '#2b5797' : 
+                                                                                              dokuman.dosyaTipi.contains('excel') ? '#217346' : 
+                                                                                              dokuman.dosyaTipi.contains('image') ? '#ffc107' : '#6c757d'};"></i>
+                                                        </p:column>
+                                                        
+                                                        <!-- Dosya Adı -->
+                                                        <p:column headerText="Dosya Adı" sortBy="#{dokuman.orijinalDosyaAdi}">
+                                                            <h:outputText value="#{dokuman.orijinalDosyaAdi}" 
+                                                                         style="font-weight: 500;"/>
+                                                        </p:column>
+                                                        
+                                                        <!-- Dosya Boyutu -->
+                                                        <p:column headerText="Boyut" style="width: 100px; text-align: center;">
+                                                            <p:badge value="#{dokuman.formattedFileSize}" 
+                                                                    severity="info"/>
+                                                        </p:column>
+                                                        
+                                                        <!-- Yüklenme Tarihi -->
+                                                        <p:column headerText="Yüklenme Tarihi" 
+                                                                 sortBy="#{dokuman.yuklenmeTarihi}"
+                                                                 style="width: 150px;">
+                                                            <h:outputText value="#{dokuman.yuklenmeTarihi}">
+                                                                <f:convertDateTime pattern="dd.MM.yyyy HH:mm" 
+                                                                                  type="localDateTime"
+                                                                                  timeZone="Europe/Istanbul"/>
+                                                            </h:outputText>
+                                                        </p:column>
+                                                        
+                                                        <!-- Yükleyen -->
+                                                        <p:column headerText="Yükleyen" style="width: 120px;">
+                                                            <h:outputText value="#{dokuman.yukleyenPersonelAd} #{dokuman.yukleyenPersonelSoyad}"
+                                                                         rendered="#{not empty dokuman.yukleyenPersonelAd}"/>
+                                                            <span style="color: #999; font-style: italic;" 
+                                                                  rendered="#{empty dokuman.yukleyenPersonelAd}">
+                                                                Sistem
+                                                            </span>
+                                                        </p:column>
+                                                        
+                                                        <!-- İşlemler -->
+                                                        <p:column headerText="İşlemler" style="width: 80px; text-align: center;">
+                                                            <!-- Silme Butonu -->
+                                                            <p:commandButton 
+                                                                icon="pi pi-trash"
+                                                                styleClass="ui-button-danger ui-button-sm"
+                                                                action="#{muracaatDokumanController.deleteDokuman(dokuman.id)}"
+                                                                update="dokumanTable growl"
+                                                                title="Sil">
+                                                                <p:confirm header="Onay" 
+                                                                          message="Bu dokümanı silmek istediğinizden emin misiniz?" 
+                                                                          icon="pi pi-exclamation-triangle"/>
+                                                            </p:commandButton>
+                                                        </p:column>
+                                                    </p:dataTable>
+                                                </p:panel>
+                                                
+                                                <!-- Controller'ları Bağla -->
+                                                <f:event type="preRenderView" 
+                                                        listener="#{muracaatController.setMuracaatDokumanController(muracaatDokumanController)}"/>
+                                                <f:event type="preRenderView" 
+                                                        listener="#{muracaatDokumanController.setMuracaatIdAndLoad(muracaatController.selectedMuracaat.id)}"
+                                                        rendered="#{not empty muracaatController.selectedMuracaat.id}"/>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </p:panel>
+                                
+                               
+                                <h:panelGroup id="yardimTalepleriContainer" layout="block">
+                                    <p:panel id="yardimTalepleriPanel" 
+                                            header="Talep Edilen Yardımlar" 
+                                            style="margin-bottom: 20px;">
+                                        <p:outputLabel value="Başvuru sahibinin talep ettiği yardımları seçiniz:" 
+                                                     style="display: block; margin-bottom: 15px; font-weight: 500;"/>
+                                        
+                                        <!-- DEBUG: Yardım Listesi Kontrolü -->
+                                        <div style="padding: 5px; background: #fff3cd; border: 1px solid #ffc107; margin-bottom: 10px; font-size: 11px;">
+                                            <strong>DEBUG:</strong> 
+                                            Yardım Listesi: #{muracaatController.yardimTipleri != null ? 'Var' : 'NULL'}, 
+                                            Sayı: #{muracaatController.yardimTipleri != null ? muracaatController.yardimTipleri.size() : 'NULL'},
+                                            Seçili: #{muracaatController.selectedYardimTipleri != null ? muracaatController.selectedYardimTipleri.size() : 'NULL'}
+                                        </div>
+                                        
+                                        <p:selectManyCheckbox id="yardimTipleri" 
+                                                             value="#{muracaatController.selectedYardimTipleri}"
+                                                             layout="responsive"
+                                                             columns="2"
+                                                             onchange="console.log('Yardım seçimi değişti. Seçili sayı:', this.querySelectorAll('input:checked').length);">
+                                            <f:selectItems value="#{muracaatController.yardimTipleri}" 
+                                                          var="yardim"
+                                                          itemLabel="#{yardim.adi} (#{yardim.yardimTipi})"
+                                                          itemValue="#{yardim.id}"/>
+                                        </p:selectManyCheckbox>
+                                        
+                                        <h:panelGroup rendered="#{empty muracaatController.yardimTipleri}"
+                                                      styleClass="ui-message ui-message-warn"
+                                                      style="display: block; padding: 10px; border-radius: 4px; margin-top: 10px;">
+                                            <h:outputText value="⚠️ Uyarı: Komisyon durumuna göre yardım tipi bulunmamaktadır."/>
+                                        </h:panelGroup>
+                                    
+                                    <div style="margin-top: 15px; padding: 10px; background: #FFF3E0; border-left: 4px solid #FF9800; border-radius: 4px;">
+                                        <i class="fas fa-info-circle" style="color: #FF9800;"></i>
+                                        <strong> Dikkat:</strong>
+                                        <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                                            <li><strong>Komisyon Kararlı = EVET:</strong> Tüm yardım tipleri görüntülenir</li>
+                                            <li><strong>Komisyon Kararlı = HAYIR:</strong> Sadece komisyonsuz yardımlar görüntülenir</li>
+                                            <li><strong>NAKDİ yardımlar</strong> komisyonsuz verilemez!</li>
+                                        </ul>
+                                    </div>
+                                    </p:panel>
+                                </h:panelGroup>
+                            </div>
+                            
+                            <!-- Butonlar -->
+                            <div class="card-footer">
+                                <p:commandButton value="#{empty muracaatController.selectedMuracaat.id ? 'Kaydet ve Devam Et' : 'Güncelle'}" 
+                                               icon="#{empty muracaatController.selectedMuracaat.id ? 'pi pi-save' : 'pi pi-check'}" 
+                                               styleClass="#{empty muracaatController.selectedMuracaat.id ? 'ui-button-success' : 'ui-button-warning'}"
+                                               action="#{muracaatController.saveMuracaat}" 
+                                               update="mainForm growl" 
+                                               process="basvuruBilgileriPanel"
+                                               ajax="true"
+                                               disableOnAjax="true"/>
+                                
+                                <p:commandButton value="Temizle" 
+                                               icon="pi pi-refresh" 
+                                               styleClass="ui-button-warning"
+                                               action="#{muracaatController.newMuracaat}" 
+                                               update="mainForm" 
+                                               process="@this"
+                                               immediate="true">
+                                    <p:confirm header="Onay" 
+                                             message="Formu temizlemek istediğinizden emin misiniz?" 
+                                             icon="pi pi-exclamation-triangle"/>
+                                </p:commandButton>
+                            </div>
+                            </h:panelGroup>
+                        </div>
+                    </p:tab>
+                    
+                  
+                    <p:tab title="2. Aile Fertleri" 
+                          icon="pi pi-users"
+                          disabled="#{not muracaatController.muracaatTamamlandi or not muracaatController.komisyonKararli}">
+                        <ui:include src="/pages/aile-fertleri.xhtml">
+                            <ui:param name="muracaatId" value="#{muracaatController.selectedMuracaat.id}"/>
+                            <ui:param name="aileFertController" value="#{aileFertController}"/>
+                        </ui:include>
+                        <f:event type="preRenderView" listener="#{aileFertController.setMuracaatController(muracaatController)}"/>
+                    </p:tab>
+                    
+                    
+                    <p:tab title="3. Maddi Durum" 
+                          icon="pi pi-money-bill"
+                          disabled="#{not muracaatController.aileFertGirildi or not muracaatController.komisyonKararli}">
+                        <ui:include src="/pages/maddi-durum.xhtml"/>
+                        <f:event type="preRenderView" listener="#{maddiDurumController.setMuracaatController(muracaatController)}"/>
+                    </p:tab>
+                    
+                   
+                    <p:tab title="4. Tahkikat" 
+                          icon="pi pi-search"
+                          disabled="#{empty muracaatController.selectedMuracaat or muracaatController.selectedMuracaat.durum ne 'TAHKIKATA_SEVK' or not muracaatController.komisyonKararli}">
+                        <ui:include src="/pages/tutanak.xhtml"/>
+                        <f:event type="preRenderView" listener="#{tutanakController.setMuracaatController(muracaatController)}"/>
+                        <f:event type="preRenderView" listener="#{tutanakController.loadTutanak(muracaatController.selectedMuracaat.id)}"/>
+                    </p:tab>
+                    
+                    
+                    <p:tab title="5. Komisyonlu Yardım Kararları" 
+                          icon="pi pi-check-circle"
+                          disabled="#{empty muracaatController.selectedMuracaat or muracaatController.selectedMuracaat.durum ne 'DEGERLENDIRME_KOMISYONU' or not muracaatController.komisyonKararli}">
+                        <ui:include src="/pages/yardim-karar.xhtml"/>
+                        <f:event type="preRenderView" listener="#{yardimKararController.setMuracaatController(muracaatController)}"/>
+                        <f:event type="preRenderView" listener="#{yardimKararController.loadYardimKararlari(muracaatController.selectedMuracaat.id, true, muracaatController.selectedYardimTipleri)}"/>
+                    </p:tab>
+                    
+                    
+                    <p:tab title="6. Komisyonsuz Yardım Kararları" 
+                          icon="pi pi-thumbs-up"
+                          disabled="#{not muracaatController.muracaatTamamlandi or muracaatController.komisyonKararli}">
+                        <ui:include src="/pages/yardim-komisyonsuz.xhtml"/>
+                        <f:event type="preRenderView" listener="#{yardimKararController.setMuracaatController(muracaatController)}"/>
+                        <f:event type="preRenderView" listener="#{yardimKararController.loadYardimKararlari(muracaatController.selectedMuracaat.id, false, muracaatController.selectedYardimTipleri)}"/>
+                    </p:tab>
+                </p:tabView>
+                </h:panelGroup>
+                
+                
+                <p:dialog id="tumMuracaatlarDialog" 
+                         header="📋 Müracaatlar (Tamamlanan ve Bekleyen)" 
+                         widgetVar="tumMuracaatlarDialogVar"
+                         modal="true" 
+                         resizable="false" 
+                         styleClass="dialog-responsive"
+                         width="90%" 
+                         height="auto"
+                         showEffect="fade" 
+                         hideEffect="fade"
+                         closable="true">
+                    
+                    <p:dataTable id="tumMuracaatlarTable" 
+                                value="#{muracaatController.tumMuracaatlar}" 
+                                var="muracaat"
+                                emptyMessage="Müracaat bulunamadı."
+                                paginator="true"
+                                rows="10"
+                                paginatorPosition="bottom"
+                                paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                currentPageReportTemplate="Toplam {totalRecords} müracaat (Gösterilen: {startRecord}-{endRecord})"
+                                rowsPerPageTemplate="5,10,15,20"
+                                styleClass="custom-datatable">
+                        
+                        <!-- Müracaat No -->
+                        <p:column headerText="Müracaat No" sortBy="#{muracaat.muracaatNo}" style="width: 100px;">
+                            <h:outputText value="#{muracaat.muracaatNo}" 
+                                       style="font-weight: bold; color: #{muracaat.durum eq 'SONUCLANDI' ? '#4CAF50' : '#2196F3'};"/>
+                        </p:column>
+                        
+                        <!-- Başvuru Sahibi -->
+                        <p:column headerText="Başvuru Sahibi" sortBy="#{muracaat.basvuruSahibi.ad}">
+                            <h:outputText value="#{muracaat.basvuruSahibi.ad} #{muracaat.basvuruSahibi.soyad}"/>
+                        </p:column>
+                        
+                        <!-- TC Kimlik No -->
+                        <p:column headerText="TC Kimlik No" style="width: 130px;">
+                            <h:outputText value="#{muracaat.basvuruSahibi.tcKimlikNo}"/>
+                        </p:column>
+                        
+                        <!-- Müracaat Tarihi -->
+                        <p:column headerText="Müracaat Tarihi" sortBy="#{muracaat.muracaatTarihi}" style="width: 150px;">
+                            <h:outputText value="#{muracaat.muracaatTarihi}">
+                                <f:convertDateTime pattern="dd.MM.yyyy" type="localDate"/>
+                            </h:outputText>
+                        </p:column>
+                        
+                        <!-- Sonuçlanma Tarihi (sadece tamamlananlar için) -->
+                        <p:column headerText="Sonuçlanma Tarihi" style="width: 150px;">
+                            <h:outputText value="#{muracaat.sonuclenmaTarihi}" rendered="#{muracaat.durum eq 'SONUCLANDI'}">
+                                <f:convertDateTime pattern="dd.MM.yyyy" type="localDate"/>
+                            </h:outputText>
+                            <span style="color: #999; font-style: italic;" rendered="#{muracaat.durum ne 'SONUCLANDI'}">-</span>
+                        </p:column>
+                        
+                        <!-- Karar No (sadece tamamlananlar için) -->
+                        <p:column headerText="Karar No" style="width: 100px;">
+                            <h:outputText value="#{muracaat.kararNo}" rendered="#{not empty muracaat.kararNo}"/>
+                            <span style="color: #999; font-style: italic;" rendered="#{empty muracaat.kararNo}">-</span>
+                        </p:column>
+                        
+                        <!-- Durum -->
+                        <p:column headerText="Durum" style="width: 120px;">
+                            <p:badge value="#{muracaat.durum.label}" 
+                                   severity="#{muracaat.durum eq 'SONUCLANDI' ? 'success' : 'warning'}"/>
+                        </p:column>
+                        
+                        <!-- Komisyon Kararlı mı? -->
+                        <p:column headerText="Komisyon Kararlı" style="width: 130px;">
+                            <p:badge value="#{muracaat.komisyonKararli ? 'Evet' : 'Hayır'}" 
+                                   severity="#{muracaat.komisyonKararli ? 'info' : 'secondary'}"/>
+                        </p:column>
+                        
+                        <!-- İşlemler -->
+                        <p:column headerText="İşlemler" style="width: 180px; text-align: center;">
+                            <p:commandButton value="#{muracaat.durum eq 'SONUCLANDI' ? 'Detay Görüntüle' : 'Devam Et'}" 
+                                           icon="#{muracaat.durum eq 'SONUCLANDI' ? 'pi pi-eye' : 'pi pi-play'}" 
+                                           styleClass="#{muracaat.durum eq 'SONUCLANDI' ? 'ui-button-info' : 'ui-button-success'} ui-button-sm"
+                                           action="#{muracaatController.muracaataDevamEt(muracaat)}"
+                                           update="mainForm growl"
+                                           process="@this"
+                                           oncomplete="PF('tumMuracaatlarDialogVar').hide();"
+                                           title="#{muracaat.durum eq 'SONUCLANDI' ? 'Müracaat detaylarını görüntüle' : 'Kaldığınız yerden devam edin'}">
+                                <p:confirm header="Onay" 
+                                          message="Bu müracaata devam etmek istediğinizden emin misiniz?" 
+                                          icon="pi pi-exclamation-triangle"/>
+                            </p:commandButton>
+                            
+                            <p:commandButton value="İptal Et" 
+                                           icon="pi pi-times" 
+                                           styleClass="ui-button-danger ui-button-sm"
+                                           action="#{muracaatController.muracaatiIptalEt(muracaat)}"
+                                           update="tumMuracaatlarTable growl"
+                                           process="@this"
+                                           rendered="#{muracaat.durum eq 'BEKLEMEDE'}"
+                                           title="Müracaata iptal et">
+                                <p:confirm header="Onay" 
+                                          message="Bu müracaata iptal etmek istediğinizden emin misiniz? Bu işlem geri alınamaz!" 
+                                          icon="pi pi-exclamation-triangle"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                    
+                    <p:separator/>
+                    
+                    <p:commandButton value="Kapat" 
+                                   icon="pi pi-times" 
+                                   styleClass="ui-button-secondary"
+                                   onclick="PF('tumMuracaatlarDialogVar').hide()"
+                                   style="float: right;"/>
+                </p:dialog>
+                
+                <p:confirmDialog global="true">
+                    <p:commandButton value="Evet" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check"/>
+                    <p:commandButton value="Hayır" type="button" styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times"/>
+                </p:confirmDialog>
+        </div> <!-- End content-body -->
+        </h:form>
+    </ui:define>
+    
+</ui:composition>
+</html>
+ 

@@ -1,0 +1,101 @@
+/**
+ * Form Responsive Tasarım İyileştirmeleri
+ */
+
+/* Input ve Button Kombinasyonları */
+.form-field [style*="display: flex"] {
+    align-items: stretch !important;
+}
+
+.form-field .ui-inputtext {
+    width: 100% !important;
+}
+
+.form-field .ui-selectonemenu {
+    width: 100% !important;
+}
+
+/* Buton Grupları */
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.button-group .ui-button {
+    flex: 1;
+    min-width: 150px;
+    white-space: nowrap;
+}
+
+/* Mobil Uyum */
+@media (max-width: 768px) {
+    /* Flexbox içindeki inputlar */
+    .form-field [style*="display: flex"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    /* Input alanları tam genişlik */
+    .form-field .ui-inputtext,
+    .form-field .ui-selectonemenu {
+        width: 100% !important;
+        min-width: unset !important;
+    }
+    
+    /* Butonlar tam genişlik */
+    .button-group .ui-button {
+        width: 100%;
+        min-width: unset;
+    }
+    
+    /* Panel başlıkları */
+    .ui-panel-titlebar {
+        font-size: 14px !important;
+        padding: 12px !important;
+    }
+    
+    /* DataTable responsive */
+    .ui-datatable {
+        font-size: 13px !important;
+    }
+    
+    .ui-datatable thead th,
+    .ui-datatable tbody td {
+        padding: 8px 5px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-grid {
+        gap: var(--spacing-md) !important;
+    }
+    
+    .ui-button {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+    }
+    
+    .card {
+        padding: var(--spacing-md) !important;
+    }
+}
+
+/* Input Text genişlik düzeltmesi */
+.ui-inputtext[style*="flex: 1"] {
+    min-width: 0 !important; /* Flex overflow fix */
+}
+
+/* Command Button responsive */
+.ui-commandbutton {
+    white-space: nowrap !important;
+}
+
+/* Grid column override - Mobilde tam genişlik */
+@media (max-width: 768px) {
+    .form-field[style*="grid-column"] {
+        grid-column: 1 / -1 !important;
+    }
+}
+

@@ -1,0 +1,275 @@
+/**
+ * Component Styles - Form elemanları ve bileşenler
+ */
+
+/* Cards */
+.card {
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.card-header {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.card-body {
+    padding: var(--spacing-md) 0;
+}
+
+.card-footer {
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+}
+
+/* Buttons - PrimeFaces override */
+.ui-button {
+    border-radius: var(--radius-md) !important;
+    padding: var(--spacing-sm) var(--spacing-lg) !important;
+    font-weight: 500 !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.ui-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md) !important;
+}
+
+.ui-button.ui-button-success {
+    background: var(--success-color) !important;
+    border-color: var(--success-color) !important;
+}
+
+.ui-button.ui-button-warning {
+    background: var(--warning-color) !important;
+    border-color: var(--warning-color) !important;
+}
+
+.ui-button.ui-button-danger {
+    background: var(--error-color) !important;
+    border-color: var(--error-color) !important;
+}
+
+/* Input Fields */
+.ui-inputfield {
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.ui-inputfield:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1) !important;
+}
+
+/* Panel */
+.ui-panel {
+    border-radius: var(--radius-lg) !important;
+    border: none !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.ui-panel-titlebar {
+    background: var(--surface-color) !important;
+    border-bottom: 2px solid var(--primary-color) !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+}
+
+.ui-panel-title {
+    font-size: var(--font-size-lg) !important;
+    font-weight: 600 !important;
+}
+
+/* DataTable */
+.ui-datatable {
+    border-radius: var(--radius-lg) !important;
+    overflow: hidden;
+}
+
+.ui-datatable thead th {
+    background: var(--primary-color) !important;
+    color: white !important;
+    padding: var(--spacing-md) !important;
+    font-weight: 600 !important;
+}
+
+.ui-datatable tbody td {
+    padding: var(--spacing-md) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.ui-datatable tbody tr:hover {
+    background: var(--bg-color) !important;
+}
+
+/* TabView */
+.ui-tabs {
+    border: none !important;
+}
+
+.ui-tabs .ui-tabs-nav {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid var(--border-color) !important;
+}
+
+.ui-tabs .ui-tabs-nav li {
+    margin-right: var(--spacing-sm) !important;
+    border: none !important;
+}
+
+.ui-tabs .ui-tabs-nav li a {
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+    border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
+    transition: all var(--transition-fast) !important;
+}
+
+.ui-tabs .ui-tabs-nav li.ui-state-active a {
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+.ui-tabs .ui-tabs-panels {
+    border: none !important;
+    padding: var(--spacing-lg) !important;
+    background: var(--surface-color) !important;
+    border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg) !important;
+}
+
+/* Messages */
+.ui-messages {
+    border-radius: var(--radius-md) !important;
+    margin-bottom: var(--spacing-lg) !important;
+}
+
+.ui-growl {
+    top: 80px !important;
+    right: var(--spacing-lg) !important;
+}
+
+.ui-growl-item {
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* Form Grid - Responsive */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    min-width: 0; /* Grid overflow fix */
+}
+
+.form-field label {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-field .required::after {
+    content: ' *';
+    color: var(--error-color);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-field {
+        gap: var(--spacing-xs);
+    }
+    
+    /* Flexbox içindeki elementlerin wrap olmasını sağla */
+    .form-field > div[style*="flex"] {
+        flex-wrap: wrap !important;
+    }
+}
+
+/* Stats Cards - Responsive */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stat-card {
+    background: var(--surface-color);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--primary-color);
+    transition: all var(--transition-fast);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card.success {
+    border-left-color: var(--success-color);
+}
+
+.stat-card.warning {
+    border-left-color: var(--warning-color);
+}
+
+.stat-card.error {
+    border-left-color: var(--error-color);
+}
+
+.stat-title {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stat-icon {
+    float: right;
+    font-size: 40px;
+    opacity: 0.3;
+}
+

@@ -1,0 +1,129 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core">
+
+    <div class="card">
+        <h3 class="card-header">
+            <i class="fas fa-thumbs-up"></i> Komisyonsuz Yardım Kararları
+        </h3>
+        
+        <div class="card-body">
+            <!-- Bilgilendirme -->
+            <div style="margin-bottom: 20px; padding: 15px; background: #E8F5E9; border-left: 4px solid #4CAF50; border-radius: 4px;">
+                <i class="fas fa-info-circle" style="color: #4CAF50;"></i>
+                <strong> Komisyonsuz Yardım:</strong>
+                <p style="margin-top: 10px; line-height: 1.6;">
+                    Bu yardımlar komisyon kararı gerektirmez. Müracaat tamamlandıktan sonra doğrudan verilebilir.
+                    <strong>NAKDİ yardımlar komisyonsuz verilemez!</strong>
+                </p>
+            </div>
+            
+            <!-- Yardım Kararı Formu -->
+            <p:panel id="komisyonsuzPanel" styleClass="komisyonsuzFormu" header="Yeni Yardım Kararı" style="margin-bottom: 20px;">
+                <div class="form-grid">
+                    <!-- Verilen Yardım (Sadece Komisyonsuz + Ayni) -->
+                    <div class="form-field">
+                        <p:outputLabel for="verilenYardimKomisyonsuz" value="Verilen Yardım" styleClass="required"/>
+                        
+                        <p:selectOneMenu id="verilenYardimKomisyonsuz" 
+                                       value="#{yardimKararController.selectedYardimAltTipi}"
+                                       converter="omnifaces.SelectItemsConverter"
+                                       required="true">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                            <f:selectItems value="#{yardimKararController.komisyonsuzYardimlar}" 
+                                          var="yardim"
+                                          itemLabel="#{yardimKararController.isTalepEdilmis(yardim.id) ? '*** ' : ''}#{yardim.adi} (#{yardim.birim})"
+                                          itemValue="#{yardim}"/>
+                        </p:selectOneMenu>
+                        <small style="display: block; margin-top: 5px; color: var(--warning-color);">
+                            <i class="fas fa-star"></i> 
+                            *** işaretliler talep edilen yardımlardır
+                        </small>
+                    </div>
+                    
+                    <!-- Adet / Sayı -->
+                    <div class="form-field">
+                        <p:outputLabel for="adetSayiKomisyonsuz" value="Adet / Sayı" styleClass="required"/>
+                        <p:inputNumber id="adetSayiKomisyonsuz" 
+                                     value="#{yardimKararController.adetSayi}"
+                                     minValue="1"
+                                     decimalPlaces="0"
+                                     required="true"/>
+                    </div>
+                    
+                    <!-- Açıklama -->
+                    <div class="form-field" style="grid-column: 1 / -1;">
+                        <p:outputLabel for="komisyonsuzAciklama" value="Açıklama"/>
+                        <p:inputTextarea id="komisyonsuzAciklama" 
+                                       value="#{yardimKararController.aciklama}"
+                                       rows="3"
+                                       placeholder="Yardım ile ilgili açıklamalar..."/>
+                    </div>
+                </div>
+                
+                <!-- Buton -->
+                <div style="margin-top: 20px;">
+                    <p:commandButton value="Yardımı Ekle" 
+                                   icon="pi pi-plus" 
+                                   styleClass="ui-button-success"
+                                   action="#{yardimKararController.addKomisyonsuzKarar}" 
+                                   update="@form" 
+                                   process="@(.komisyonsuzFormu)"
+                                   oncomplete="console.log('✅ Komisyonsuz yardım eklendi, form güncellendi')"/>
+                </div>
+            </p:panel>
+            
+            <!-- Komisyonsuz Karar Listesi -->
+            <p:panel id="komisyonsuzListesi" styleClass="komisyonsuzListesi" header="Verilen Yardımlar">
+                <p:dataTable value="#{yardimKararController.komisyonsuzKararlar}" 
+                           var="karar"
+                           emptyMessage="Henüz yardım kaydı girilmemiştir"
+                           responsiveLayout="scroll">
+                    <p:column headerText="Yardım Tipi">
+                        <h:outputText value="#{karar.yardimAltTipi.adi}"/>
+                    </p:column>
+                    <p:column headerText="Adet/Sayı">
+                        <p:badge value="#{karar.adetSayi}" severity="info"/>
+                    </p:column>
+                    <p:column headerText="Birim">
+                        <h:outputText value="#{karar.yardimAltTipi.birim}"/>
+                    </p:column>
+                    <p:column headerText="Durum">
+                        <p:badge value="KABUL EDİLDİ" severity="success"/>
+                    </p:column>
+                    <p:column headerText="İşlemler" style="width: 100px;">
+                        <p:commandButton icon="pi pi-trash" 
+                                       styleClass="ui-button-danger ui-button-sm"
+                                       action="#{yardimKararController.deleteKarar(karar)}" 
+                                       update="@form"
+                                       process="@this"
+                                       oncomplete="console.log('✅ Karar silindi')">
+                            <p:confirm message="Silmek istediğinizden emin misiniz?"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+        </div>
+        
+        <!-- Footer -->
+        <p:outputPanel id="komisyonsuzFooterArea" styleClass="footerArea" layout="block" style="display:flex; justify-content: flex-end; margin-top: 20px;">
+                
+                <p:commandButton value="Müracaatı Tamamla" 
+                           icon="pi pi-check-circle" 
+                           styleClass="ui-button-success"
+                           action="#{muracaatController.komisyonsuzTamamla}" 
+                           update=":mainForm:toolbar growl" 
+                           process="@this"
+                           rendered="#{not muracaatController.komisyonKararli and not empty yardimKararController.komisyonsuzKararlar}"
+                           style="margin-left: auto;">
+                <p:confirm header="Tamamlama Onayı" 
+                         message="Müracaatı tamamlamak istediğinizden emin misiniz? Müracaat durumu 'SONUÇLANDI' olacak." 
+                         icon="pi pi-question-circle"/>
+            </p:commandButton>
+        </p:outputPanel>
+    </div>
+
+</ui:composition>
+

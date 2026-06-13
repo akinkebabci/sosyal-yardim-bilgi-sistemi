@@ -1,0 +1,195 @@
+/**
+ * Doküman Yükleme Özel Stilleri
+ */
+
+/* FileUpload Bileşeni */
+.custom-upload .ui-fileupload {
+    border: 2px dashed var(--primary-color);
+    border-radius: 8px;
+    background: #f8f9fa;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.custom-upload .ui-fileupload:hover {
+    border-color: var(--primary-hover);
+    background: #e9ecef;
+}
+
+.custom-upload .ui-fileupload-buttonbar {
+    background: transparent;
+    border: none;
+    padding: 0 0 15px 0;
+}
+
+.custom-upload .ui-fileupload-content {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.custom-upload .ui-fileupload-choose,
+.custom-upload .ui-fileupload-upload,
+.custom-upload .ui-fileupload-cancel {
+    margin-right: 10px;
+}
+
+/* Drag & Drop Area */
+.custom-upload .ui-fileupload-content:empty::before {
+    content: '📎 Dosyaları buraya sürükleyip bırakabilirsiniz';
+    display: block;
+    text-align: center;
+    color: #6c757d;
+    font-size: 14px;
+    padding: 20px;
+}
+
+/* DataTable Özelleştirme */
+.custom-datatable {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.custom-datatable .ui-datatable-thead > tr > th {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    padding: 12px 10px;
+    border: none;
+}
+
+.custom-datatable .ui-datatable-data > tr {
+    transition: all 0.2s ease;
+}
+
+.custom-datatable .ui-datatable-data > tr:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.custom-datatable .ui-datatable-data > tr > td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Dosya İkon Stilleri */
+.custom-datatable .fas.fa-file-pdf {
+    color: #dc3545 !important;
+}
+
+.custom-datatable .fas.fa-file-word {
+    color: #2b5797 !important;
+}
+
+.custom-datatable .fas.fa-file-excel {
+    color: #217346 !important;
+}
+
+.custom-datatable .fas.fa-file-image {
+    color: #ffc107 !important;
+}
+
+.custom-datatable .fas.fa-file-alt {
+    color: #6c757d !important;
+}
+
+/* Action Buttons */
+.custom-datatable .ui-button-icon-only {
+    width: 32px;
+    height: 32px;
+}
+
+/* Badge Özelleştirme */
+.custom-datatable .ui-badge {
+    font-weight: 500;
+    padding: 4px 10px;
+    font-size: 11px;
+}
+
+/* Empty Message */
+.custom-datatable .ui-datatable-emptymessage {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Pagination */
+.custom-datatable .ui-paginator {
+    background: #f8f9fa;
+    border-top: 2px solid var(--primary-color);
+    padding: 10px;
+}
+
+/* Panel Başlıkları */
+.ui-panel .ui-panel-titlebar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    border-radius: 6px 6px 0 0;
+    padding: 12px 15px;
+}
+
+.ui-panel .ui-panel-content {
+    padding: 20px;
+}
+
+/* Toggle Icon */
+.ui-panel .ui-panel-titlebar-icon {
+    color: white !important;
+}
+
+.ui-panel .ui-panel-titlebar-icon:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .custom-datatable .ui-datatable-thead > tr > th {
+        font-size: 10px;
+        padding: 8px 5px;
+    }
+    
+    .custom-datatable .ui-datatable-data > tr > td {
+        padding: 8px 5px;
+        font-size: 12px;
+    }
+    
+    .custom-upload {
+        padding: 10px;
+    }
+}
+
+/* Progress bar gizle - auto mode kullanıldığı için gerekli değil */
+.ui-fileupload .ui-fileupload-progress {
+    display: none !important;
+}
+
+.ui-fileupload .ui-progressbar {
+    display: none !important;
+}
+
+/* Success Animation */
+@keyframes successPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.upload-success {
+    animation: successPulse 0.5s ease;
+}
+

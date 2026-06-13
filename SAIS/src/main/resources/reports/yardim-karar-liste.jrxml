@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="yardim-karar-liste" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30"
+              topMargin="20" bottomMargin="20">
+
+    <parameter name="RAPOR_BASLIGI" class="java.lang.String"/>
+    <parameter name="RAPOR_TARIHI" class="java.lang.String"/>
+    <parameter name="TOPLAM_KAYIT" class="java.lang.Integer"/>
+    <parameter name="TOPLAM_TUTAR" class="java.lang.Double"/>
+
+    <field name="id" class="java.lang.Long"/>
+    <field name="muracaat.muracaatNo" class="java.lang.Long"/>
+    <field name="muracaat.basvuruSahibi.ad" class="java.lang.String"/>
+    <field name="muracaat.basvuruSahibi.soyad" class="java.lang.String"/>
+    <field name="muracaat.basvuruSahibi.adres" class="java.lang.String"/>
+    <field name="muracaat.muracaatTarihi" class="java.time.LocalDate"/>
+    <field name="yardimAltTipi.adi" class="java.lang.String"/>
+    <field name="yardimAltTipi.yardimTipi" class="com.sais.enums.YardimTipi"/>
+    <field name="verilenTutar" class="java.lang.Double"/>
+    <field name="adetSayi" class="java.lang.Integer"/>
+    <field name="yardimDurum" class="com.sais.enums.YardimDurum"/>
+    <field name="aciklama" class="java.lang.String"/>
+    <field name="yardimDilimi.adi" class="java.lang.String"/>
+    <field name="kararSayisi" class="java.lang.Integer"/>
+    <field name="kararTarihi" class="java.time.LocalDate"/>
+    <field name="kararNumarasi" class="java.lang.String"/>
+    <field name="toplantiTarihi" class="java.time.LocalDate"/>
+
+    <variable name="SIRA_NO" class="java.lang.Integer" calculation="Count">
+        <initialValueExpression><![CDATA[0]]></initialValueExpression>
+    </variable>
+
+    <title>
+        <band height="220">
+            <!-- Kurum Adı -->
+            <textField>
+                <reportElement x="0" y="0" width="535" height="25"/>
+                <textElement textAlignment="Center">
+                    <font size="16" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["KURUM ADI"]]></textFieldExpression>
+            </textField>
+            
+            <!-- Başvuru Bilgileri -->
+            <staticText>
+                <reportElement x="0" y="30" width="535" height="18" mode="Opaque" backcolor="#E0E0E0"/>
+                <box>
+                    <topPen lineWidth="0.5"/>
+                    <leftPen lineWidth="0.5"/>
+                    <bottomPen lineWidth="0.5"/>
+                    <rightPen lineWidth="0.5"/>
+                </box>
+                <textElement verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Başvuru Bilgileri]]></text>
+            </staticText>
+            
+            <textField>
+                <reportElement x="0" y="53" width="535" height="15"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Müracaat No: " + $F{muracaat.muracaatNo}]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="0" y="68" width="535" height="15"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Müracaat Tarihi: " + ($F{muracaat.muracaatTarihi} != null ? $F{muracaat.muracaatTarihi}.format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "")]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="0" y="83" width="535" height="15"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Ad Soyad: " + $F{muracaat.basvuruSahibi.ad} + " " + $F{muracaat.basvuruSahibi.soyad}]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="0" y="98" width="535" height="15"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Adres: " + ($F{muracaat.basvuruSahibi.adres} != null ? $F{muracaat.basvuruSahibi.adres} : "")]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="0" y="123" width="535" height="15"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[""]]></textFieldExpression>
+            </textField>
+            
+            <!-- Yardım Teslim Bilgileri -->
+            <staticText>
+                <reportElement x="0" y="143" width="535" height="18" mode="Opaque" backcolor="#E0E0E0"/>
+                <box>
+                    <topPen lineWidth="0.5"/>
+                    <leftPen lineWidth="0.5"/>
+                    <bottomPen lineWidth="0.5"/>
+                    <rightPen lineWidth="0.5"/>
+                </box>
+                <textElement verticalAlignment="Middle">
+                    <font size="12" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Yardım Teslim Bilgileri]]></text>
+            </staticText>
+            
+            <textField>
+                <reportElement x="0" y="166" width="535" height="15"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Karar Sayısı: " + $F{kararNumarasi}]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="0" y="181" width="535" height="15"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Karar Tarihi: " + ($F{kararTarihi} != null ? $F{kararTarihi}.format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "Belirtilmemiş")]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="0" y="196" width="535" height="15"/>
+                <textElement>
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Toplantı Tarihi: " + ($F{toplantiTarihi} != null ? $F{toplantiTarihi}.format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "")]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <pageHeader>
+        <band height="20">
+            <!-- Boş alan -->
+        </band>
+    </pageHeader>
+
+    <columnHeader>
+        <band height="25">
+            <staticText>
+                <reportElement x="0" y="0" width="60" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[TİPİ]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="60" y="0" width="120" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[YARDIM ADI]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="180" y="0" width="80" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[DURUMU]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="260" y="0" width="100" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[AÇIKLAMA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="360" y="0" width="80" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[YARDIM TUTARI]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="440" y="0" width="50" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[YARDIM SAYISI]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="490" y="0" width="45" height="25" backcolor="#CCCCCC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[YARDIM DİLİMİ]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="60" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{yardimAltTipi.yardimTipi} != null ? $F{yardimAltTipi.yardimTipi}.getLabel() : ""]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="60" y="0" width="120" height="20"/>
+                <box leftPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{yardimAltTipi.adi}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="180" y="0" width="80" height="20"/>
+                <box leftPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{yardimDurum} != null ? $F{yardimDurum}.getLabel() : ""]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="260" y="0" width="100" height="20"/>
+                <box leftPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{aciklama} != null ? $F{aciklama} : ""]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true" pattern="#,##0.00">
+                <reportElement x="360" y="0" width="80" height="20"/>
+                <box ><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{verilenTutar}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="440" y="0" width="50" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{adetSayi} != null ? $F{adetSayi} : ""]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="490" y="0" width="45" height="20"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{yardimDilimi.adi} != null ? $F{yardimDilimi.adi} : ""]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="100">
+            <!-- Teslim Eden ve Teslim Alan İmza Alanları -->
+            <staticText>
+                <reportElement x="0" y="5" width="200" height="15"/>
+                <textElement>
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Teslim Eden]]></text>
+            </staticText>
+            
+            <staticText>
+                <reportElement x="300" y="5" width="200" height="15"/>
+                <textElement>
+                    <font size="10" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Teslim Alan]]></text>
+            </staticText>
+            
+            <!-- İmza çizgileri -->
+            <line>
+                <reportElement x="0" y="25" width="200" height="1"/>
+            </line>
+            
+            <line>
+                <reportElement x="300" y="25" width="200" height="1"/>
+            </line>
+            
+            <!-- İmza alanları için boşluk -->
+            <textField>
+                <reportElement x="0" y="35" width="200" height="30"/>
+                <textElement>
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[""]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="300" y="35" width="200" height="30"/>
+                <textElement>
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[""]]></textFieldExpression>
+            </textField>
+            
+            <textField>
+                <reportElement x="435" y="70" width="100" height="15"/>
+                <textElement textAlignment="Right">
+                    <font size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Sayfa " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+</jasperReport>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="jakarta.faces.core">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title><ui:insert name="title">Sosyal Yardım Bilgi Sistemi</ui:insert></title>
+    
+
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;🤝&lt;/text&gt;&lt;/svg&gt;"/>
+    
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    
+  
+    <h:outputStylesheet library="css" name="variables.css"/>
+    <h:outputStylesheet library="css" name="layout.css"/>
+    <h:outputStylesheet library="css" name="sidebar.css"/>
+    <h:outputStylesheet library="css" name="components.css"/>
+    <h:outputStylesheet library="css" name="file-upload.css"/>
+    <h:outputStylesheet library="css" name="form-responsive.css"/>
+    <h:outputStylesheet library="css" name="responsive.css"/>
+    
+    <ui:insert name="head"/>
+</h:head>
+
+<h:body>
+    <div class="layout-container-full">
+       
+        <ui:include src="/templates/topbar.xhtml"/>
+        
+        
+        <div class="layout-main-full">
+           
+            <div class="layout-content">
+                
+                <ui:insert name="content">
+                    
+                </ui:insert>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <h:outputScript library="js" name="app.js" target="body"/>
+    <ui:insert name="scripts"/>
+</h:body>
+</html>
+

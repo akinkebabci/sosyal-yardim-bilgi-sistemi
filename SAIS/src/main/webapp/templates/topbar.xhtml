@@ -1,0 +1,64 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <header class="layout-topbar">
+        <div class="topbar-left">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fas fa-hands-helping" style="font-size: 28px; color: var(--primary-color);"></i>
+                <div>
+                    <h1 class="topbar-title" style="font-size: 20px; margin: 0;">SAIS</h1>
+                    <span style="font-size: 11px; color: var(--text-secondary);">Sosyal Yardım Bilgi Sistemi</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="topbar-right">
+            <h:form>
+                <p:commandButton value="Yardım Kararları Raporu" 
+                              icon="pi pi-file-pdf"
+                              styleClass="ui-button-rounded ui-button-danger"
+                              style="font-weight: 600;"
+                              action="#{raporBean.tumYardimKararlariPdfIndir}"
+                              ajax="false"/>
+            </h:form>
+        </div>
+    </header>
+    
+    <style>
+        .layout-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+        
+        .topbar-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .topbar-link {
+            text-decoration: none;
+        }
+        
+        .topbar-link:hover {
+            text-decoration: none;
+        }
+        
+        @media (max-width: 768px) {
+            .layout-topbar {
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+            
+            .topbar-right {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+
+</ui:composition>

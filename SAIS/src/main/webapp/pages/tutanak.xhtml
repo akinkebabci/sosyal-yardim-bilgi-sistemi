@@ -1,0 +1,258 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core">
+
+    <div class="card">
+        <h3 class="card-header">
+            <i class="fas fa-search"></i> Tahkikat Bilgileri
+        </h3>
+        
+        <h:panelGroup id="tahkikatContent" layout="block" styleClass="card-body">
+            <!-- Bilgilendirme -->
+            <div style="margin-bottom: 20px; padding: 15px; background: #E3F2FD; border-left: 4px solid #2196F3; border-radius: 4px;">
+                <i class="fas fa-info-circle" style="color: #2196F3;"></i>
+                <strong> Tahkikat Süreci:</strong>
+                <p style="margin-top: 10px; line-height: 1.6;">
+                    Müracaat "Tahkikata Sevk" durumuna geldiğinde bu sekme aktif olur.
+                    Yetkili personel, sahada yaptığı incelemenin sonuçlarını bu forma girer.
+                </p>
+            </div>
+            
+            <p:panel id="tahkikatPanel" styleClass="tahkikatPanel" header="Tahkikat Bilgileri" style="margin-bottom: 20px;">
+                <div class="form-grid">
+                    <!-- Tahkikat Personeli -->
+                    <div class="form-field">
+                        <p:outputLabel for="tahkikatPersoneli" value="Tahkikatta Görevli Personel" styleClass="required"/>
+                        <p:selectOneMenu id="tahkikatPersoneli" 
+                                       value="#{tutanakController.selectedTahkikatPersoneli}"
+                                       converter="omnifaces.SelectItemsConverter"
+                                       required="true">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                            <f:selectItems value="#{tutanakController.tahkikatPersonelleri}" 
+                                          var="personel"
+                                          itemLabel="#{personel.ad} #{personel.soyad} - #{personel.unvan}"
+                                          itemValue="#{personel}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    
+                    <!-- Tahkikat Tarihi -->
+                    <div class="form-field">
+                        <p:outputLabel for="tahkikatTarihi" value="Tahkikat Tarihi" styleClass="required"/>
+                        <p:calendar id="tahkikatTarihi" 
+                                  value="#{tutanakController.tutanakBilgisi.tahkikatTarihi}"
+                                  pattern="dd/MM/yyyy"
+                                  showIcon="true"
+                                  required="true"/>
+                    </div>
+                    
+                    <!-- Tahkikat Metni -->
+                    <div class="form-field" style="grid-column: 1 / -1;">
+                        <p:outputLabel for="tahkikatMetni" value="Tahkikat Metni" styleClass="required"/>
+                        <p:inputTextarea id="tahkikatMetni" 
+                                       value="#{tutanakController.tutanakBilgisi.tahkikatMetni}"
+                                       rows="8"
+                                       maxlength="2000"
+                                       counter="tahkikatCounter"
+                                       counterTemplate="{0} karakter kaldı"
+                                       required="true"
+                                       placeholder="Ev ziyareti sonucu gözlemler, aile durumu, yaşam koşulları, maddi durum değerlendirmesi..."/>
+                        <h:outputText id="tahkikatCounter"/>
+                    </div>
+                    
+                    <!-- Tahkikat Görselleri -->
+                    <div class="form-field" style="grid-column: 1 / -1;">
+                        <p:outputLabel for="evGorselleri" value="Ev Görselleri"/>
+                        <p:fileUpload id="evGorselleri" 
+                                    listener="#{tutanakController.handleTahkikatGorselUpload}"
+                                    mode="advanced"
+                                    multiple="true"
+                                    auto="true"
+                                    sequential="true"
+                                    dragDropSupport="true"
+                                    chooseLabel="Resim Seç"
+                                    allowTypes="/(\.|\/)(jpe?g|png)$/"
+                                    maxFileSize="10485760"
+                                    fileLimit="10"
+                                    invalidFileMessage="Sadece JPG/PNG yüklenebilir"
+                                    fileLimitMessage="En fazla 10 resim"
+                                    update=":mainForm:tabView:gorselListesi growl"
+                                    styleClass="custom-fileupload"/>
+                        <small style="display: block; margin-top: 8px; color: #666;">
+                            Resim seçtiğinizde otomatik yüklenecektir • JPG/PNG • Max 10 dosya
+                        </small>
+                        
+                        <!-- Yüklenen Görseller Listesi -->
+                        <h:panelGroup id="gorselListesi" layout="block" style="margin-top: 15px;">
+                            <h5 style="margin-bottom: 10px; color: #333;" rendered="#{not empty tutanakController.yuklenenGorseller}">
+                                Yüklenen Görseller (#{tutanakController.yuklenenGorseller.size()} adet):
+                            </h5>
+                            <p:dataTable value="#{tutanakController.yuklenenGorseller}" 
+                                       var="gorsel"
+                                       styleClass="table-sm"
+                                       emptyMessage="Henüz görsel yüklenmedi">
+                                <p:column headerText="Dosya Adı">
+                                    <i class="fas fa-image" style="color: #4CAF50; margin-right: 8px;"></i>
+                                    <h:outputText value="#{gorsel.dosyaAdi}"/>
+                                </p:column>
+                                <p:column headerText="Boyut" style="width: 100px;">
+                                    <h:outputText value="#{gorsel.dosyaBoyutu / 1024}">
+                                        <f:convertNumber pattern="#,##0.0" />
+                                    </h:outputText> KB
+                                </p:column>
+                                <p:column headerText="İşlem" style="width: 80px; text-align: center;">
+                                    <p:commandButton icon="pi pi-trash" 
+                                                   styleClass="ui-button-danger ui-button-sm"
+                                                   action="#{tutanakController.deleteTahkikatGorsel(gorsel.id)}"
+                                                   update=":mainForm:tabView:gorselListesi"
+                                                   process="@this"
+                                                   title="Sil">
+                                        <p:confirm message="#{gorsel.dosyaAdi} dosyasını silmek istediğinizden emin misiniz?"/>
+                                    </p:commandButton>
+                                </p:column>
+                            </p:dataTable>
+                        </h:panelGroup>
+                    </div>
+                </div>
+                
+                <!-- Butonlar -->
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <p:commandButton value="Tahkikat Bilgilerini Kaydet" 
+                                   icon="pi pi-check" 
+                                   styleClass="ui-button-success"
+                                   action="#{tutanakController.saveTutanak}" 
+                                   update=":mainForm:tabView:tahkikatContent :mainForm:tabView:tahkikatFooter growl" 
+                                   process="@(.tahkikatPanel)"/>
+                    
+                    <p:commandButton value="Yazdır" 
+                                   icon="pi pi-print" 
+                                   styleClass="ui-button-secondary"
+                                   ajax="false"
+                                   onclick="window.print(); return false;"/>
+                </div>
+            </p:panel>
+            
+            <!-- Tahkikat Özeti Wrapper (Update için) -->
+            <h:panelGroup id="tahkikatOzeti" layout="block">
+                <!-- Tahkikat Özeti (Kaydedilmişse) -->
+                <p:panel header="📋 Tahkikat Özet Raporu" 
+                         rendered="#{tutanakController.tutanakBilgisi.id ne null}"
+                         styleClass="tahkikatPanel"
+                         style="margin-top: 20px; border: 2px solid #4CAF50;">
+                <div style="padding: 20px; background: linear-gradient(to bottom, #f8f9fa, #ffffff);">
+                    <!-- Durum Badge -->
+                    <div style="margin-bottom: 15px;">
+                        <h:panelGroup rendered="#{tutanakController.tutanakTamamlandi}">
+                            <span style="background: #4CAF50; color: white; padding: 5px 15px; border-radius: 15px; font-size: 0.9em; font-weight: bold;">
+                                ✓ Tamamlandı
+                            </span>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{not tutanakController.tutanakTamamlandi}">
+                            <span style="background: #FFC107; color: #333; padding: 5px 15px; border-radius: 15px; font-size: 0.9em; font-weight: bold;">
+                                ⚠ Eksik Bilgi Var
+                            </span>
+                        </h:panelGroup>
+                    </div>
+                    
+                    <!-- Bilgiler -->
+                    <p:panelGrid columns="2" styleClass="ui-noborder" 
+                                columnClasses="font-weight-bold"
+                                style="width: 100%; margin-bottom: 15px;">
+                        <h:outputText value="👤 Tahkikat Personeli:"/>
+                        <h:panelGroup>
+                            <h:outputText value="#{tutanakController.tutanakBilgisi.tahkikatPersonel.ad} #{tutanakController.tutanakBilgisi.tahkikatPersonel.soyad}"
+                                         rendered="#{tutanakController.tutanakBilgisi.tahkikatPersonel ne null}"/>
+                            <h:outputText value="⚠️ Belirtilmemiş"
+                                         rendered="#{tutanakController.tutanakBilgisi.tahkikatPersonel eq null}"
+                                         style="color: #FFC107; font-weight: bold;"/>
+                        </h:panelGroup>
+                        
+                        <h:outputText value="📅 Tahkikat Tarihi:"/>
+                        <h:outputText value="#{tutanakController.tutanakBilgisi.tahkikatTarihi}">
+                            <f:convertDateTime type="localDate" pattern="dd/MM/yyyy"/>
+                        </h:outputText>
+                        
+                        <h:outputText value="📸 Yüklenen Görsel:"/>
+                        <h:outputText value="#{tutanakController.yuklenenGorseller.size()} adet"/>
+                        
+                        <h:outputText value="🕐 Kayıt Tarihi:"/>
+                        <h:outputText value="#{tutanakController.tutanakBilgisi.olusturmaTarihi}">
+                            <f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/>
+                        </h:outputText>
+                    </p:panelGrid>
+                    
+                    <hr style="margin: 20px 0; border-top: 2px solid #e0e0e0;"/>
+                    
+                    <!-- Tahkikat Metni -->
+                    <div>
+                        <p:outputLabel value="📝 Tahkikat Metni:" style="font-weight: bold; display: block; margin-bottom: 10px; font-size: 1.1em;"/>
+                        <h:panelGroup rendered="#{tutanakController.tutanakBilgisi.tahkikatMetni ne null and not empty tutanakController.tutanakBilgisi.tahkikatMetni}">
+                            <div style="padding: 15px; background: #F5F7FA; border-radius: 8px; line-height: 1.8; border-left: 4px solid #4CAF50;">
+                                <h:outputText value="#{tutanakController.tutanakBilgisi.tahkikatMetni}" escape="false" 
+                                            style="white-space: pre-wrap;"/>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{tutanakController.tutanakBilgisi.tahkikatMetni eq null or empty tutanakController.tutanakBilgisi.tahkikatMetni}">
+                            <div style="padding: 15px; background: #FFF3CD; border-radius: 8px; border-left: 4px solid #FFC107;">
+                                <i class="fas fa-exclamation-triangle" style="color: #FFC107; margin-right: 8px;"></i>
+                                <strong>Tahkikat metni girilmemiş</strong>
+                            </div>
+                        </h:panelGroup>
+                    </div>
+                </div>
+                </p:panel>
+            </h:panelGroup>
+        </h:panelGroup>
+        
+     
+        <h:panelGroup id="tahkikatFooter" layout="block" styleClass="card-footer" 
+                     style="justify-content: space-between; gap: 15px; display: flex; align-items: center; padding: 20px; background: #f8f9fa; border-top: 3px solid #e0e0e0;">
+            
+        >
+            <div style="flex: 1;">
+             
+                <h:panelGroup rendered="#{tutanakController.tutanakBilgisi.id eq null}">
+                    <div style="padding: 10px 15px; background: #E3F2FD; border-left: 4px solid #2196F3; border-radius: 4px;">
+                        <i class="pi pi-info-circle" style="color: #2196F3; margin-right: 8px;"></i>
+                        <strong>Bilgi:</strong> Önce tahkikat bilgilerini kaydedin.
+                    </div>
+                </h:panelGroup>
+                
+             
+                <h:panelGroup rendered="#{tutanakController.tutanakBilgisi.id ne null and not tutanakController.tutanakTamamlandi}">
+                    <div style="padding: 10px 15px; background: #FFF3CD; border-left: 4px solid #FFC107; border-radius: 4px;">
+                        <i class="fas fa-exclamation-triangle" style="color: #FFC107; margin-right: 8px;"></i>
+                        <strong>Eksik Bilgi:</strong> Personel, tahkikat metni ve tarihi eksiksiz girilmelidir.
+                    </div>
+                </h:panelGroup>
+                
+                <!-- Tamamlanmış -->
+                <h:panelGroup rendered="#{tutanakController.tutanakTamamlandi}">
+                    <div style="padding: 10px 15px; background: #E8F5E9; border-left: 4px solid #4CAF50; border-radius: 4px;">
+                        <i class="fas fa-check-circle" style="color: #4CAF50; margin-right: 8px;"></i>
+                        <strong>Tamamlandı:</strong> Müracaatı komisyona sevk edebilirsiniz.
+                    </div>
+                </h:panelGroup>
+            </div>
+            
+       
+            <div>
+                <p:commandButton value="Komisyona Sevk Et" 
+                               icon="pi pi-send" 
+                               iconPos="right"
+                               styleClass="ui-button-warning ui-button-lg"
+                               action="#{muracaatController.komisyonaGonder}" 
+                               update="mainForm:tabView" 
+                               process="@this"
+                               disabled="#{not tutanakController.tutanakTamamlandi}"
+                               rendered="#{muracaatController.komisyonKararli and tutanakController.tutanakBilgisi.id ne null}"
+                               style="font-size: 1.1em; padding: 12px 24px;">
+                    <p:confirm message="Müracaatı değerlendirme komisyonuna göndermek istediğinizden emin misiniz?&#10;&#10;Bu işlem sonrası tahkikat bilgileri değiştirilemez."/>
+                </p:commandButton>
+            </div>
+        </h:panelGroup>
+    </div>
+
+</ui:composition>
+

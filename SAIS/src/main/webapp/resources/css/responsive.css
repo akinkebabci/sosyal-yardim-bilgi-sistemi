@@ -1,0 +1,119 @@
+/**
+ * Responsive Styles - Media Queries
+ */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+    :root {
+        --sidebar-width: 260px;
+    }
+    
+    .content-body {
+        padding: var(--spacing-md);
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    :root {
+        --sidebar-width: 100%;
+    }
+    
+    .layout-sidebar {
+        transform: translateX(-100%);
+        transition: transform var(--transition-normal);
+    }
+    
+    .layout-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    
+    .layout-main {
+        margin-left: 0 !important;
+    }
+    
+    .layout-topbar {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+    
+    .topbar-title {
+        font-size: var(--font-size-lg);
+    }
+    
+    .user-info {
+        display: none;
+    }
+    
+    .layout-content {
+        padding: var(--spacing-md);
+    }
+    
+    .content-title {
+        font-size: var(--font-size-xl);
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+    .layout-topbar {
+        flex-wrap: wrap;
+    }
+    
+    .topbar-right {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: var(--spacing-sm);
+    }
+    
+    .content-body {
+        padding: var(--spacing-sm);
+    }
+    
+    .ui-tabs .ui-tabs-nav li a {
+        padding: var(--spacing-sm) var(--spacing-md) !important;
+        font-size: var(--font-size-sm) !important;
+    }
+    
+    .form-field {
+        margin-bottom: var(--spacing-md);
+    }
+}
+
+/* Print Styles */
+@media print {
+    .layout-sidebar,
+    .layout-topbar,
+    .ui-button {
+        display: none !important;
+    }
+    
+    .layout-main {
+        margin-left: 0 !important;
+    }
+    
+    .content-body {
+        box-shadow: none !important;
+        border: 1px solid #ddd;
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+

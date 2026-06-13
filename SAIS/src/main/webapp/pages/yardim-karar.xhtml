@@ -1,0 +1,310 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="jakarta.faces.core">
+
+    <div class="card">
+        <h3 class="card-header">
+            <i class="fas fa-gavel"></i> Yardım Kararları (Komisyon Kararlı)
+        </h3>
+        
+        <div class="card-body">
+            <!-- Bilgilendirme -->
+            <div style="margin-bottom: 20px; padding: 15px; background: #FFF3E0; border-left: 4px solid #FF9800; border-radius: 4px;">
+                <i class="fas fa-info-circle" style="color: #FF9800;"></i>
+                <strong> Komisyon Kararı:</strong>
+                <p style="margin-top: 10px; line-height: 1.6;">
+                    Müracaat "Değerlendirme Komisyonu" aşamasına geldiğinde bu sekme aktif olur.
+                    Komisyon toplantısında alınan kararlar bu forma girilir.
+                </p>
+            </div>
+            
+           
+            <p:panel id="yardimKararFormu" 
+                    header="Yeni Yardım Kararı" 
+                    style="margin-bottom: 20px;"
+                    disabled="false">
+                <div class="form-grid">
+                    <!-- Toplantı Tarihi (Komisyon için ZORUNLU) -->
+                    <div class="form-field">
+                        <p:outputLabel for="toplantiTarihi" value="Komisyon Toplantı Tarihi" styleClass="required"/>
+                        <p:calendar id="toplantiTarihi" 
+                                  value="#{yardimKararController.toplantiTarihi}"
+                                  pattern="dd/MM/yyyy"
+                                  showIcon="true"
+                                  required="true"
+                                  mindate="#{yardimKararController.minToplantiTarihi}"
+                                  maxdate="#{yardimKararController.bugun}"
+                                  requiredMessage="Komisyon toplantı tarihi zorunludur"/>
+                        <small style="display: block; margin-top: 5px; color: var(--text-secondary);">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Seçilebilir tarih aralığı:</strong>
+                            <h:outputText value=" #{yardimKararController.minToplantiTarihi} - " 
+                                        rendered="#{yardimKararController.minToplantiTarihi ne null}"/>
+                            <h:outputText value="#{yardimKararController.bugun}" 
+                                        rendered="#{yardimKararController.minToplantiTarihi ne null}"/>
+                            <h:outputText value=" Bugüne kadar (#{yardimKararController.bugun})" 
+                                        rendered="#{yardimKararController.minToplantiTarihi eq null}"/>
+                        </small>
+                    </div>
+                    
+                    <!-- Verilen Yardım -->
+                    <div class="form-field">
+                        <p:outputLabel for="verilenYardim" value="Verilen Yardım" styleClass="required"/>
+                        
+                        <p:selectOneMenu id="verilenYardim" 
+                                       value="#{yardimKararController.selectedYardimAltTipiId}"
+                                       required="true"
+                                       requiredMessage="Verilen yardım tipi seçilmelidir!">
+                            <f:selectItem itemLabel="🔍 Seçiniz..." itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{yardimKararController.yardimTipleri}" 
+                                          var="yardimTipi"
+                                          itemLabel="#{yardimKararController.isTalepEdilmis(yardimTipi.id) ? '*** ' : ''}#{yardimTipi.adi} (#{yardimTipi.yardimTipi})"
+                                          itemValue="#{yardimTipi.id}"/>
+                            <p:ajax event="valueChange" 
+                                   listener="#{yardimKararController.onYardimTipiChangeById}"
+                                   update="yardimDurum yardimDetayPanel"
+                                   process="@this"/>
+                        </p:selectOneMenu>
+                        <small style="display: block; margin-top: 5px; color: var(--warning-color);">
+                            *** işaretliler talep edilen yardımlardır
+                        </small>
+                    </div>
+                    
+                    <!-- Yardım Durumu -->
+                    <div class="form-field">
+                        <p:outputLabel for="yardimDurum" value="Karar" styleClass="required"/>
+                        
+                        <!-- Tek dropdown - dinamik seçenekler -->
+                        <p:selectOneMenu id="yardimDurum" 
+                                       value="#{yardimKararController.selectedYardimDurum}"
+                                       required="true"
+                                       requiredMessage="Karar durumu seçilmelidir">
+                            <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}" noSelectionOption="true"/>
+                            <f:selectItems value="#{yardimKararController.availableYardimDurumlari}" 
+                                          var="durum"
+                                          itemLabel="#{durum eq 'KABUL_EDILDI' ? 'Kabul Edildi' : 'Red Edildi'}"
+                                          itemValue="#{durum}"/>
+                            <p:ajax event="valueChange" 
+                                   update="yardimDetayPanel"
+                                   process="@this"/>
+                        </p:selectOneMenu>
+                        
+                        <small style="display: block; margin-top: 5px; color: var(--info-color);">
+                            <i class="fas fa-info-circle"></i> 
+                            <h:panelGroup rendered="#{yardimKararController.talepDisindaSecim}">
+                                <span style="color: #FF9800; font-weight: bold;">
+                                    ⚠ Talep edilmeyen yardım - Sadece "Kabul Edildi" seçilebilir
+                                </span>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{not yardimKararController.talepDisindaSecim}">
+                                Kabul veya Red seçebilirsiniz
+                            </h:panelGroup>
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Yardım Detayları (Dinamik) - Wrapper for update -->
+                <h:panelGroup id="yardimDetayPanel" layout="block">
+                    <p:panel style="margin-top: 20px;" 
+                             rendered="#{yardimKararController.selectedYardimDurum ne null}">
+                    <h:panelGroup rendered="#{yardimKararController.showNakdiDetaylar}">
+                        <h4 style="margin-bottom: 15px;">Nakdi Yardım Detayları</h4>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <p:outputLabel for="verilenTutar" value="Verilen Tutar (₺)" styleClass="required"/>
+                                <p:inputNumber id="verilenTutar" 
+                                             value="#{yardimKararController.verilenTutar}"
+                                             minValue="0"
+                                             decimalPlaces="2"
+                                             symbol=" ₺"
+                                             symbolPosition="s"
+                                             required="true"/>
+                            </div>
+                            
+                            <div class="form-field">
+                                <p:outputLabel for="yardimDilimi" value="Yardım Dilimi"/>
+                                <p:selectOneMenu id="yardimDilimi" 
+                                               value="#{yardimKararController.selectedYardimDilimi}"
+                                               converter="omnifaces.SelectItemsConverter">
+                                    <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                                    <f:selectItems value="#{yardimKararController.yardimDilimleri}" 
+                                                  var="dilim"
+                                                  itemLabel="#{dilim.adi}"
+                                                  itemValue="#{dilim}"/>
+                                </p:selectOneMenu>
+                            </div>
+                            
+                            <div class="form-field">
+                                <p:outputLabel for="yardimDonemi" value="Yardım Dönemi"/>
+                                <p:selectOneMenu id="yardimDonemi" 
+                                               value="#{yardimKararController.selectedYardimDonemi}"
+                                               converter="omnifaces.SelectItemsConverter">
+                                    <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                                    <f:selectItems value="#{yardimKararController.yardimDonemleri}" 
+                                                  var="donem"
+                                                  itemLabel="#{donem.adi} (#{donem.aySayisi} ay)"
+                                                  itemValue="#{donem}"/>
+                                </p:selectOneMenu>
+                            </div>
+                            
+                            <div class="form-field">
+                                <p:outputLabel for="hesapBilgisi" value="IBAN Hesap Bilgisi" styleClass="required"/>
+                                <p:selectOneMenu id="hesapBilgisi" 
+                                               value="#{yardimKararController.selectedHesapBilgisiId}"
+                                               requiredMessage="IBAN hesap bilgisi seçilmelidir!">
+                                    <f:selectItem itemLabel="💳 Seçiniz..." itemValue="#{null}" noSelectionOption="true"/>
+                                    <f:selectItems value="#{yardimKararController.hesapBilgileri}" 
+                                                  var="hesap"
+                                                  itemLabel="#{hesap.bankaAdi} - #{hesap.iban}"
+                                                  itemValue="#{hesap.id}"/>
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                    </h:panelGroup>
+                    
+                    <h:panelGroup rendered="#{yardimKararController.showAyniDetaylar}">
+                        <h4 style="margin-bottom: 15px;">Ayni Yardım Detayları</h4>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <p:outputLabel for="adetSayi" value="Adet / Sayı" styleClass="required"/>
+                                <p:inputNumber id="adetSayi" 
+                                             value="#{yardimKararController.adetSayi}"
+                                             minValue="1"
+                                             decimalPlaces="0"
+                                             required="true"/>
+                            </div>
+                        </div>
+                    </h:panelGroup>
+                    
+                    <h:panelGroup rendered="#{yardimKararController.showRedDetaylar}">
+                        <h4 style="margin-bottom: 15px;">Red Gerekçesi</h4>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <p:outputLabel for="redSebebi" value="Red Sebebi" styleClass="required"/>
+                                <p:selectOneMenu id="redSebebi" 
+                                               value="#{yardimKararController.selectedRedSebebi}"
+                                               converter="omnifaces.SelectItemsConverter"
+                                               required="true">
+                                    <f:selectItem itemLabel="Seçiniz..." itemValue="#{null}"/>
+                                    <f:selectItems value="#{yardimKararController.redSebepleri}" 
+                                                  var="redSebebi"
+                                                  itemLabel="#{redSebebi.adi}"
+                                                  itemValue="#{redSebebi}"/>
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                    </h:panelGroup>
+                    
+                    <!-- Açıklama (Hepsi için ortak) - Her zaman göster -->
+                    <h:panelGroup rendered="true">
+                        <div class="form-field" style="grid-column: 1 / -1; margin-top: 15px;">
+                            <p:outputLabel for="kararAciklama" value="Açıklama"/>
+                            <p:inputTextarea id="kararAciklama" 
+                                           value="#{yardimKararController.aciklama}"
+                                           rows="3"
+                                           placeholder="Karar ile ilgili ek açıklamalar..."/>
+                        </div>
+                    </h:panelGroup>
+                    </p:panel>
+                </h:panelGroup>
+                
+                <!-- Butonlar -->
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <p:commandButton value="📝 Kararı Ekle" 
+                                   icon="pi pi-plus" 
+                                   styleClass="ui-button-success"
+                                   style="font-weight: bold;"
+                                   action="#{yardimKararController.addKomisyonluKarar}" 
+                                   ajax="false"
+                                   oncomplete="console.log('✅ Komisyonlu karar eklendi - Sayfa yenileniyor!');"/>
+                </div>
+            </p:panel>
+            
+            <!-- Karar Listesi -->
+            <p:panel id="kararListesi" header="Verilen Kararlar">
+                <p:dataTable id="yardimKararlarTable"
+                           value="#{yardimKararController.yardimKararlari}" 
+                           var="karar"
+                           emptyMessage="Henüz karar girilmemiştir"
+                           responsiveLayout="scroll"
+                           stateKey="yardimKararTable"
+                           paginator="false">
+                    <p:column headerText="Yardım Tipi">
+                        <h:outputText value="#{karar.yardimAltTipi.adi}"/>
+                    </p:column>
+                    <p:column headerText="Durum">
+                        <p:badge value="#{karar.yardimDurum.label}" 
+                               severity="#{karar.yardimDurum eq 'KABUL_EDILDI' ? 'success' : 'danger'}"/>
+                    </p:column>
+                    <p:column headerText="Detay">
+                        <h:outputText value="#{karar.verilenTutar} ₺" 
+                                    rendered="#{karar.verilenTutar ne null}">
+                            <f:convertNumber type="currency" currencySymbol="₺"/>
+                        </h:outputText>
+                        <h:outputText value="#{karar.adetSayi} Adet" 
+                                    rendered="#{karar.adetSayi ne null}"/>
+                        <h:outputText value="Red Edildi" 
+                                    rendered="#{karar.yardimDurum eq 'RED_EDILDI'}"
+                                    style="color: #d32f2f; font-weight: bold;"/>
+                    </p:column>
+                    <p:column headerText="Toplantı">
+                        <h:outputText value="#{karar.toplantiTarihi}"/>
+                    </p:column>
+                    <p:column headerText="Karar No">
+                        <h:outputText value="#{karar.kararSayisi}" 
+                                    rendered="#{karar.kesinlesti}"/>
+                        <p:badge value="Beklemede" 
+                               severity="warning" 
+                               rendered="#{not karar.kesinlesti}"/>
+                    </p:column>
+                    <p:column headerText="Karar Tarihi">
+                        <h:outputText value="#{karar.kararTarihi}" 
+                                    rendered="#{karar.kesinlesti}"/>
+                        <span style="color: #666; font-style: italic;" 
+                              rendered="#{not karar.kesinlesti}">-</span>
+                    </p:column>
+                    <p:column headerText="İşlemler" style="width: 100px;">
+                        <!-- SENARYO: Kesinleşmiş kararlar silinemez -->
+                        <p:commandButton icon="pi pi-trash" 
+                                       styleClass="ui-button-danger ui-button-sm"
+                                       action="#{yardimKararController.deleteKarar(karar)}" 
+                                       update="@form"
+                                       process="@this"
+                                       rendered="#{not karar.kesinlesti}"
+                                       oncomplete="console.log('✅ Komisyonlu karar silindi')">
+                            <p:confirm message="Silmek istediğinizden emin misiniz?"/>
+                        </p:commandButton>
+                        <span style="color: #28a745; font-weight: bold;" 
+                              rendered="#{karar.kesinlesti}">
+                            <i class="fas fa-lock"></i> Kesinleşti
+                        </span>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+        </div>
+        
+        <!-- Footer -->
+        <p:outputPanel id="komisyonluFooterArea" layout="block">
+            <div class="card-footer" style="justify-content: flex-end;">
+               
+                <p:commandButton value="🔒 Kesinleştir ve Sonuçlandır" 
+                               icon="pi pi-check" 
+                               styleClass="ui-button-success"
+                               style="font-weight: bold; padding: 10px 20px;"
+                               action="#{yardimKararController.kesinlestir}" 
+                               update=":mainForm:toolbar :mainForm:statsCards komisyonluFooterArea kararListesi" 
+                               process="@this"
+                               rendered="#{yardimKararController.hasKesinlesmemisKarar}"
+                               oncomplete="console.log('✅ Kararlar kesinleştirildi!')">
+                    <p:confirm header="⚠️ Kesinleştirme Onayı" 
+                             message="#{yardimKararController.yardimKararlari.size()} adet karar kesinleştirilecek ve müracaat SONUÇLANDIRILACAK! Bu işlem GERİ ALINAMAZ. Emin misiniz?" 
+                             icon="pi pi-exclamation-triangle"/>
+                </p:commandButton>
+            </div>
+        </p:outputPanel>
+    </div>
+
+</ui:composition>
+

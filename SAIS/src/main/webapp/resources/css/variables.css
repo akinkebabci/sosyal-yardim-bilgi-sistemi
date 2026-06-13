@@ -1,0 +1,66 @@
+/**
+ * CSS Variables - Design System
+ * Tüm renk, spacing ve tipografi değişkenleri
+ */
+:root {
+    /* Primary Colors */
+    --primary-color: #2196F3;
+    --primary-dark: #1976D2;
+    --primary-light: #BBDEFB;
+    
+    /* Secondary Colors */
+    --secondary-color: #FF9800;
+    --secondary-dark: #F57C00;
+    --secondary-light: #FFE0B2;
+    
+    /* Neutral Colors */
+    --bg-color: #F5F7FA;
+    --surface-color: #FFFFFF;
+    --text-primary: #2C3E50;
+    --text-secondary: #7F8C8D;
+    --border-color: #E0E0E0;
+    
+    /* Status Colors */
+    --success-color: #4CAF50;
+    --warning-color: #FF9800;
+    --error-color: #F44336;
+    --info-color: #2196F3;
+    
+    /* Sidebar */
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 70px;
+    --sidebar-bg: #2C3E50;
+    --sidebar-hover: #34495E;
+    --sidebar-text: #ECF0F1;
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.12);
+    --shadow-lg: 0 10px 20px rgba(0,0,0,0.15);
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Typography */
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size-sm: 12px;
+    --font-size-base: 14px;
+    --font-size-lg: 16px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 24px;
+}
+

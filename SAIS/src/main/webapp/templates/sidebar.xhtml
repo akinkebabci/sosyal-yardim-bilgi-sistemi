@@ -1,0 +1,135 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:f="jakarta.faces.core">
+
+    <aside class="layout-sidebar" id="sidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-hands-helping"></i>
+            </div>
+            <div class="sidebar-title">SAIS</div>
+        </div>
+        
+        <!-- Sidebar Menu -->
+        <nav class="sidebar-menu">
+            <!-- Ana Menü -->
+            <div class="menu-section">
+                <div class="menu-section-title">Ana Menü</div>
+                <ul class="menu-items">
+                    <li class="menu-item">
+                        <a href="#{request.contextPath}/pages/dashboard.xhtml" 
+                           class="menu-item-link"
+                           data-tooltip="Dashboard">
+                            <span class="menu-item-icon">
+                                <i class="fas fa-home"></i>
+                            </span>
+                            <span class="menu-item-text">Dashboard</span>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#{request.contextPath}/pages/muracaat.xhtml" 
+                           class="menu-item-link active"
+                           data-tooltip="Müracaat İşlemleri">
+                            <span class="menu-item-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </span>
+                            <span class="menu-item-text">Müracaat İşlemleri</span>
+                            <span class="menu-item-badge">5</span>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#{request.contextPath}/pages/kisi.xhtml" 
+                           class="menu-item-link"
+                           data-tooltip="Kişi Yönetimi">
+                            <span class="menu-item-icon">
+                                <i class="fas fa-users"></i>
+                            </span>
+                            <span class="menu-item-text">Kişi Yönetimi</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Yardım İşlemleri -->
+            <div class="menu-section">
+                <div class="menu-section-title">Yardım İşlemleri</div>
+                <ul class="menu-items">
+                    <li class="menu-item">
+                        <a href="#{request.contextPath}/pages/yardim-karar.xhtml" 
+                           class="menu-item-link"
+                           data-tooltip="Yardım Kararları">
+                            <span class="menu-item-icon">
+                                <i class="fas fa-gavel"></i>
+                            </span>
+                            <span class="menu-item-text">Yardım Kararları</span>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#{request.contextPath}/pages/tutanak.xhtml" 
+                           class="menu-item-link"
+                           data-tooltip="Tutanak İşlemleri">
+                            <span class="menu-item-icon">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <span class="menu-item-text">Tutanak İşlemleri</span>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#{request.contextPath}/pages/odeme.xhtml" 
+                           class="menu-item-link"
+                           data-tooltip="Ödeme İşlemleri">
+                            <span class="menu-item-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </span>
+                            <span class="menu-item-text">Ödeme İşlemleri</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Ayarlar -->
+            <div class="menu-section">
+                <div class="menu-section-title">Sistem</div>
+                <ul class="menu-items">
+                    <li class="menu-item">
+                        <a href="#{request.contextPath}/pages/tanimlamalar.xhtml" 
+                           class="menu-item-link"
+                           data-tooltip="Tanımlamalar">
+                            <span class="menu-item-icon">
+                                <i class="fas fa-cog"></i>
+                            </span>
+                            <span class="menu-item-text">Tanımlamalar</span>
+                        </a>
+                    </li>
+                    
+                    <li class="menu-item">
+                        <a href="#{request.contextPath}/pages/kullanicilar.xhtml" 
+                           class="menu-item-link"
+                           data-tooltip="Kullanıcılar">
+                            <span class="menu-item-icon">
+                                <i class="fas fa-user-shield"></i>
+                            </span>
+                            <span class="menu-item-text">Kullanıcılar</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-info">
+                <i class="fas fa-circle" style="color: #4CAF50; font-size: 8px;"></i>
+                <span>Sistem Aktif</span>
+            </div>
+        </div>
+    </aside>
+
+</ui:composition>
+

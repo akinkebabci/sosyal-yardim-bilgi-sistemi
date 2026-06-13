@@ -1,0 +1,48 @@
+/* Sosyal Yardım Bilgi Sistemi - Özel Stiller */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+.ui-panel {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.ui-panel-title {
+    font-weight: bold;
+    color: #333;
+}
+
+.ui-toolbar {
+    background: linear-gradient(to bottom, #f9f9f9 0%, #eeeeee 100%);
+    border: 1px solid #d0d0d0;
+}
+
+.ui-messages-info {
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+    color: #31708f;
+}
+
+.ui-button-success {
+    background-color: #5cb85c !important;
+    border-color: #4cae4c !important;
+}
+
+.ui-button-warning {
+    background-color: #f0ad4e !important;
+    border-color: #eea236 !important;
+}
+
+.ui-tabview .ui-tabview-nav li.ui-state-disabled {
+    opacity: 0.5;
+}
+
+.required-field {
+    color: red;
+    font-weight: bold;
+}
+
+

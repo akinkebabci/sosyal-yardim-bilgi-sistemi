@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/templates/layout.xhtml">
+    
+    <ui:define name="title">Yardım Kararları Raporu - SAIS</ui:define>
+    
+    <ui:define name="pageTitle">Yardım Kararları Raporu</ui:define>
+    
+    <ui:define name="content">
+        <h:form id="raporForm">
+            <p:growl id="messages" showDetail="true" life="3000"/>
+
+            <div class="content-body">
+                <div class="card">
+                    <h3 class="card-header">
+                        <i class="fas fa-file-pdf"></i> Yardım Kararları Raporu
+                    </h3>
+                    
+                    <div class="card-body">
+                        <p style="font-size: 16px; line-height: 1.8; color: var(--text-secondary);">
+                            Bu rapor, tüm yardım kararlarını içeren detaylı bir PDF raporudur. 
+                            Raporda şu bilgiler yer alır:
+                        </p>
+                        
+                        <ul style="font-size: 15px; line-height: 2; margin: 20px 0;">
+                            <li>Müracaatın durumuna göre düzenleme kuralları</li>
+                            <li>Başvuru bilgileri (Müracaat No, Tarihi, Ad Soyad, Adres)</li>
+                            <li>Yardım teslim bilgileri (Karar Sayısı, Karar Tarihi, Toplantı Tarihi)</li>
+                            <li>Verilen yardım bilgileri (Tip, Yardım Adı, Durum, Açıklama, Tutar, Sayı, Dilim)</li>
+                            <li>İmza alanları (Teslim Eden, Teslim Alan)</li>
+                        </ul>
+                        
+                        <div style="margin-top: 30px; text-align: center;">
+                            <p:commandButton value="PDF Raporu İndir" 
+                                           icon="pi pi-file-pdf" 
+                                           styleClass="ui-button-danger"
+                                           style="font-size: 18px; padding: 15px 40px; font-weight: 600;"
+                                           action="#{raporBean.tumYardimKararlariPdfIndir}" 
+                                           ajax="false"/>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </h:form>
+    </ui:define>
+    
+</ui:composition>
+</html>

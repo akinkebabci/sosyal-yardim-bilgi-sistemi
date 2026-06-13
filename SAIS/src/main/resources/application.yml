@@ -1,0 +1,93 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /sais
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: Sosyal Yardım Bilgi Sistemi
+  
+  banner:
+    charset: UTF-8
+  
+  messages:
+    encoding: UTF-8
+  
+  # Multipart File Upload Configuration
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
+      file-size-threshold: 2KB
+    
+  datasource:
+    url: jdbc:mysql://localhost:3306/sais_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Europe/Istanbul
+    username: root
+    password: 12345
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  jpa:
+    hibernate:
+      ddl-auto: create  r
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        jdbc:
+          charset: UTF-8
+        hbm2ddl:
+          auto: create  
+    open-in-view: false
+    defer-datasource-initialization: true  
+  
+  sql:
+    init:
+      mode: always  
+      data-locations: classpath:database/master-data.sql  
+      continue-on-error: false  
+      encoding: UTF-8
+    
+  web:
+    resources:
+      static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/
+
+
+joinfaces:
+  faces:
+    project-stage: Development
+    facelets:
+      skip-comments: true
+      refresh-period: 0
+    state-saving-method: server
+    default-charset: UTF-8
+    validate-empty-fields: false
+  primefaces:
+    theme: saga
+    font-awesome: true
+  mojarra:
+    enable-standalone: true
+    
+
+file:
+  storage:
+    upload-dir: uploads
+    muracaat-dir: muracaat
+    allowed-types: pdf,doc,docx,jpg,jpeg,png,gif,xls,xlsx,txt
+    max-file-size: 10485760  # 10MB in bytes
+
+logging:
+  level:
+    com.sais: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+    org.springframework: WARN
+    org.primefaces: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  charset:
+    console: UTF-8
