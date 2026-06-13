@@ -235,6 +235,6 @@ Herkesin serbestçe kullanabilmesi, değiştirebilmesi ve dağıtabilmesi amacı
 
 ## Geliştirici
 
-**Akin Kebabcii** — Bu proje bir eğitim ve referans simülasyonu olarak geliştirilmiştir.
+**Akin Kebabci** — Bu proje bir eğitim ve referans simülasyonu olarak geliştirilmiştir.
 
 > *"Sosyal yardımda dijitalleşme: eğitim ve referans için açık kaynak bir çözüm."*
