@@ -8,7 +8,9 @@
 
 SAIS, belediye sosyal hizmetler müdürlükleri için geliştirilmiş kapsamlı bir **sosyal yardım müracaat yönetim sistemidir**. Vatandaşların sosyal yardım başvurularını; başvuru alımından tutanak/tahkikat aşamasına, komisyon değerlendirmesinden yardım kararı ve kesinleştirmeye kadar tüm süreçleri dijital ortamda yönetir.
 
-Sistem, **MERNİS entegrasyonu** ile kişi bilgilerini otomatik çekme, **aile ferdi analizi**, **maddi durum değerlendirmesi** ve **komisyon karar süreçleri** gibi temel işlevleri içerir.
+**Bu proje bir simülasyon (demo) projesidir.** Gerçek belediye sistemi yerine, yazılım geliştirme, eğitim ve referans amacıyla herkese açık şekilde paylaşılmaktadır. MERNİS entegrasyonu simülasyon modunda çalışmaktadır — gerçek kimlik servisine bağlantı yapılmamıştır.
+
+Sistem; **MERNİS simülasyonu** ile kişi bilgilerini otomatik çekme, **aile ferdi analizi**, **maddi durum değerlendirmesi** ve **komisyon karar süreçleri** gibi temel işlevleri içerir. İlk çalıştırmada 25+ referans tablosu otomatik olarak doldurulur, böylece uygulama anında kullanıma hazır olur.
 
 ---
 
@@ -170,17 +172,16 @@ http://localhost:8080/sais/
 
 ---
 
-## MERNİS Entegrasyonu
+## MERNİS Entegrasyonu (Simülasyon)
 
-Sistem, **simülasyon modu** ile varsayılan olarak çalışır. Gerçek MERNİS entegrasyonu için:
+**Sistem tamamen simülasyon modunda çalışır.** Gerçek MERNİS servisine bağlantı yoktur. TC Kimlik No girilerek rastgele ama tutarlı kişi bilgileri üretilir.
 
-```yaml
-sais:
-  mernis:
-    simulate: false
-```
+Simülasyon mantığı:
+- TC'nin ilk 4 hanesi `seed` olarak kullanılır — aynı TC her zaman aynı sonuçları döner
+- TC'nin son hanesine göre ikamet yeri belirlenir: `0-5` → Gebze içi, `6-9` → Gebze dışı
+- MERNİS Yakınlık Servisi simülasyonu ile aile fertleri (eş, çocuk, anne vb.) otomatik üretilir
 
-Simülasyon modunda TC Kimlik No'nun ilk 4 hanesi seed olarak kullanılarak tutarlı veriler üretilir. Son hanesine göre Gebze içi/dışı ikamet kontrolü yapılır (0-5: Gebze içi, 6-9: Gebze dışı).
+Gerçek MERNİS entegrasyonu ileride eklenebilir. Simülasyon modu, eğitim ve demo amaçlı mükemmel bir test ortamı sunar.
 
 ---
 
@@ -214,7 +215,7 @@ Simülasyon modunda TC Kimlik No'nun ilk 4 hanesi seed olarak kullanılarak tuta
 
 ## Katkıda Bulunma
 
-Katkılar memnuniyetle karşılanır. Lütfen önce bir issue açarak değişikliği tartışın.
+Bu proje **eğitim ve referans amaçlı** herkese açıktır. Katkılar memnuniyetle karşılanır. Fork'layıp kendi ihtiyaçlarınıza göre geliştirebilirsiniz.
 
 1. Fork yapın
 2. Feature branch oluşturun (`git checkout -b feature/yeni-ozellik`)
@@ -228,10 +229,12 @@ Katkılar memnuniyetle karşılanır. Lütfen önce bir issue açarak değişikl
 
 Bu proje **MIT Lisansı** altında lisanslanmıştır. Detaylar için `LICENSE` dosyasına bakın.
 
+Herkesin serbestçe kullanabilmesi, değiştirebilmesi ve dağıtabilmesi amacıyla açık kaynak olarak paylaşılmaktadır.
+
 ---
 
 ## Geliştirici
 
-**SAIS Geliştirme Ekibi** — Gebze Belediyesi Sosyal Hizmetler Müdürlüğü otomasyon projesi.
+**Akin Kebabcii** — Bu proje bir eğitim ve referans simülasyonu olarak geliştirilmiştir.
 
-> *"Sosyal yardımda şeffaflık ve hız için dijital çözüm."*
+> *"Sosyal yardımda dijitalleşme: eğitim ve referans için açık kaynak bir çözüm."*
